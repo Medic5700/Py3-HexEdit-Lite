@@ -6,10 +6,10 @@ def getch():
     import msvcrt #windows specific operations
     return msvcrt.getch()
 
-def _interface():
+def _interface(data, curserLocation):
     """Prints file name, size of file, buffer status, and the hex editing interface"""
     #test interface
-    test = """
+    prototype = """
 Py3HexEditLite v0.0                    File: ReadMe.txt                         
 Size:50000Bytes   Buffer:0050/1000  Location:1234567890ABCDEF.8/1234567890ABCDEF
 1234567890AB| FF FF FF FF FF FF FF FF| FF FF FF FF FF FF FF FF| 1234567890ABCDEF
@@ -30,7 +30,34 @@ Size:50000Bytes   Buffer:0050/1000  Location:1234567890ABCDEF.8/1234567890ABCDEF
 1234567890AB| FF FF __ __ __ __ __ __| __ __ __ __ __ __ __ __| 12
 Command Arg Arg Arg?
     """
-    print(test)
+    text = "Py3HexEditLite v0.0                    File: ReadMe.txt                         " + "\n"
+    text += "Size:50000Bytes   Buffer:0050/1000  Location:1234567890ABCDEF.8/1234567890ABCDEF" + "\n"
+    for i in range(0,16):
+        temp = hex(i)[2:].zfill(12) + "|"
+        for j in range(0,8):
+            if i*16+j >= len(data):
+                temp += " __"
+            else:
+                temp += " " + hex(data[i*16+j])[2:].zfill(2)
+        temp += "|"
+        for j in range(8,16):
+            if i*16+j >= len(data):
+                temp += " __"
+            else:
+                temp += " " + hex(data[i*16+j])[2:].zfill(2)
+        temp += "| "
+        for j in range(0,16):
+            if i*16+j >= len(data):
+                temp += " "
+            else:
+                if chr(data[i*16+j]).isprintable():
+                    temp += chr(data[i*16+j])
+                else:
+                    temp += "."
+        text += temp + "\n"
+    text += "Command Arg Arg Arg?"
+    print(text)
+
 class WriteBuffer:
     pass
 
