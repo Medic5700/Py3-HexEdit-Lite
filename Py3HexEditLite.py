@@ -1,4 +1,5 @@
 import os
+import math
 
 version = "v0.1"
 
@@ -31,20 +32,45 @@ Size:50000Bytes   Buffer:0050/1000  Location:1234567890ABCDEF.8/1234567890ABCDEF
 Command Arg Arg Arg?
     """
     text = "Py3HexEditLite v0.0                    File: ReadMe.txt                         " + "\n"
-    text += "Size:50000Bytes   Buffer:0050/1000  Location:1234567890ABCDEF.8/1234567890ABCDEF" + "\n"
+    text += "Size:50000Bytes   Buffer:0050/1000  Location:" + hex(math.floor(curserLocation))[2:].zfill(16).upper() + "."
+    if (math.floor(curserLocation) == curserLocation): #adds the hex decimal location, May have to correct for endienness
+        text += "0"
+    else:
+        text += "8"
+    text += "/1234567890ABCDEF" + "\n"
     for i in range(0,16):
-        temp = hex(i)[2:].zfill(12) + "|"
+        temp = hex(i*16)[2:].zfill(12) + "|"
         for j in range(0,8):
-            if i*16+j >= len(data):
-                temp += " __"
+            temp += " "
+            if (curserLocation == i*16+j): #large 4 bits
+                temp += "-"
+            elif (len(data) <= i*16+j):
+                temp += "_"
             else:
-                temp += " " + hex(data[i*16+j])[2:].zfill(2)
+                temp += hex(data[i*16+j] // 16)[2:]
+            
+            if (curserLocation == i*16+j+0.5): #small 4 bits
+                temp += "-"
+            elif (len(data) <= i*16+j):
+                temp += "_"
+            else:
+                temp += hex(data[i*16+j] % 16)[2:].upper()
         temp += "|"
         for j in range(8,16):
-            if i*16+j >= len(data):
-                temp += " __"
+            temp += " "
+            if (curserLocation == i*16+j): #large 4 bits
+                temp += "-"
+            elif (len(data) <= i*16+j):
+                temp += "_"
             else:
-                temp += " " + hex(data[i*16+j])[2:].zfill(2)
+                temp += hex(data[i*16+j] // 16)[2:].upper()
+            
+            if (curserLocation == i*16+j+0.5): #small 4 bits
+                temp += "-"
+            elif (len(data) <= i*16+j):
+                temp += "_"
+            else:
+                temp += hex(data[i*16+j] % 16)[2:].upper()
         temp += "| "
         for j in range(0,16):
             if i*16+j >= len(data):
