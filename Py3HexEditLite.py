@@ -95,3 +95,25 @@ if __name__ == "__main__":
     screenLocation = 0 #in multiples of 16
     
     _interface(data, curserLocation)
+    #import curses
+    '''
+    up = 224+72
+    down = 224+80
+    left = 224+75
+    right = 224+77
+    '''
+    #getch()
+    
+    while True:
+        temp = ord(getch())
+        if (temp == 224):
+            temp2 = ord(getch())
+            if (temp2 == 72):
+                curserLocation = up(curserLocation)
+            if (temp2 == 80):
+                curserLocation = down(curserLocation)
+            if (temp2 == 75):
+                curserLocation = left(curserLocation)
+            if (temp2 == 77):
+                curserLocation = right(curserLocation)
+        _interface(data, curserLocation)
