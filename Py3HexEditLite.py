@@ -1,5 +1,7 @@
 import os
 
+version = "v0.1"
+
 def getch():
     import msvcrt #windows specific operations
     return msvcrt.getch()
@@ -29,7 +31,20 @@ Size:50000Bytes   Buffer:0050/1000  Location:1234567890ABCDEF.8/1234567890ABCDEF
 Command Arg Arg Arg?
     """
     print(test)
+class WriteBuffer:
+    pass
 
+class ReadBuffer:
+    pass
+
+def up(x):
+    return max(0,x-16)
+def down(x):
+    return x+16
+def left(x):
+    return max(0,x-0.5)
+def right(x):
+    return x+0.5
 
 if __name__ == "__main__":
     filePath = None
@@ -41,6 +56,8 @@ if __name__ == "__main__":
         while (os.path.exists(filePath) == False):
             filePath = input("Enter a file path:")
     
+    curserLocation = 0.0 #A real, since in hex, a byte is represented as 2 hex chars
+    screenLocation = 0 #in multiples of 16
     
     print("End Program, press key to continue")
     getch()
