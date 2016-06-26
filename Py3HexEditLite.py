@@ -82,9 +82,16 @@ if __name__ == "__main__":
         filePath = ""
         while (os.path.exists(filePath) == False):
             filePath = input("Enter a file path:")
+        
+    print("Py3HexEditLite " + version + " has started")
+    print("Attempting to Open file: " + filePath)
     
+    file = open(filePath,'rb')
+    data = file.read()
+    
+    fileSize = os.path.getsize(filePath)
+    fileName = filePath #TODO:include file name, excluding the path
     curserLocation = 0.0 #A real, since in hex, a byte is represented as 2 hex chars
     screenLocation = 0 #in multiples of 16
     
-    print("End Program, press key to continue")
-    getch()
+    _interface(data, curserLocation)
