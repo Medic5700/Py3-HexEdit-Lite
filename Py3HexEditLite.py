@@ -70,13 +70,13 @@ Size:50000Bytes   Buffer:0050/1000  Location:1234567890ABCDEF.8/1234567890ABCDEF
 1234567890AB| FF FF __ __ __ __ __ __| __ __ __ __ __ __ __ __| 12
 Command Arg Arg Arg?
     """
-    text = "Py3HexEditLite v0.0                    File: ReadMe.txt                         " + "\n"
-    text += "Size:50000Bytes   Buffer:0050/1000  Location:" + hex(math.floor(curserLocation))[2:].zfill(16).upper() + "."
+    text = "Py3HexEditLite " + version.ljust(8, " ") + "File:" + filePath.ljust(52," ") + "\n"
+    text += "Size:" + str(fileSize).rjust(8," ") + " B   Buffer:XXX%|XXX%  Location:" + hex(math.floor(curserLocation))[2:].upper().rjust(16, " ") + "."
     if (math.floor(curserLocation) == curserLocation): #adds the hex decimal location, May have to correct for endienness
         text += "0"
     else:
         text += "8"
-    text += "/1234567890ABCDEF" + "\n"
+    text += "/" + hex(fileSize)[2:].upper().rjust(16, " ") + "\n"
     for i in range(screenLocation//16,screenLocation//16 + 16): #TODO: this is a shortcut, fix it
         temp = hex(i*16)[2:].zfill(12) + "|"
         for j in range(0,8):
