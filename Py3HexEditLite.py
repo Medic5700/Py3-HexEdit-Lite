@@ -134,7 +134,11 @@ def up(x,y):
         temp = max(0, y - 16)
     else:
         temp = y
-    return max(0,x-16), temp
+    if (x <= 16):
+        temp2 = x
+    else:
+        temp2 = x - 16
+    return temp2, temp
 def down(x,y):
     if (((x + 16)// 16) * 16 - y) >= 256:
         temp = y + 16
