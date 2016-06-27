@@ -7,7 +7,7 @@ def getch():
     import msvcrt #windows specific operations
     return msvcrt.getch()
 
-def _interface(data, curserLocation):
+def _interface(data, curserLocation, screenLocation):
     """Prints file name, size of file, buffer status, and the hex editing interface"""
     #test interface
     prototype = """
@@ -38,7 +38,7 @@ Command Arg Arg Arg?
     else:
         text += "8"
     text += "/1234567890ABCDEF" + "\n"
-    for i in range(0,16):
+    for i in range(screenLocation//16,screenLocation//16 + 16): #TODO: this is a shortcut, fix it
         temp = hex(i*16)[2:].zfill(12) + "|"
         for j in range(0,8):
             temp += " "
@@ -90,14 +90,30 @@ class WriteBuffer:
 class ReadBuffer:
     pass
 
-def up(x):
-    return max(0,x-16)
-def down(x):
-    return x+16
-def left(x):
-    return max(0,x-0.5)
-def right(x):
-    return x+0.5
+def up(x,y):
+    if (y > x - 16):
+        temp = max(0, y - 16)
+    else:
+        temp = y
+    return max(0,x-16), temp
+def down(x,y):
+    if (((x + 16)// 16) * 16 - y) >= 256:
+        temp = y + 16
+    else:
+        temp = y        
+    return x+16, temp
+def left(x,y):
+    if (y > x - 0.5):
+        temp = max(0, y - 16)
+    else:
+        temp = y    
+    return max(0,x-0.5), temp
+def right(x,y):
+    if (((x + 0.5)// 16) * 16 - y) >= 256:
+        temp = y + 16
+    else:
+        temp = y
+    return x+0.5, temp
 
 if __name__ == "__main__":
     filePath = None
@@ -120,7 +136,7 @@ if __name__ == "__main__":
     curserLocation = 0.0 #A real, since in hex, a byte is represented as 2 hex chars
     screenLocation = 0 #in multiples of 16
     
-    _interface(data, curserLocation)
+    _interface(data, curserLocation, screenLocation)
     #import curses
     '''
     up = 224+72
@@ -135,11 +151,14 @@ if __name__ == "__main__":
         if (temp == 224):
             temp2 = ord(getch())
             if (temp2 == 72):
-                curserLocation = up(curserLocation)
+                curserLocation, screenLocation = up(curserLocation, screenLocation)
             if (temp2 == 80):
-                curserLocation = down(curserLocation)
+                curserLocation, screenLocation = down(curserLocation, screenLocation)
             if (temp2 == 75):
-                curserLocation = left(curserLocation)
+                curserLocation, screenLocation = left(curserLocation, screenLocation)
             if (temp2 == 77):
-                curserLocation = right(curserLocation)
-        _interface(data, curserLocation)
+                curserLocation, screenLocation = right(curserLocation, screenLocation)
+            print(temp2)
+        print(temp)
+        _interface(data, curserLocation, screenLocation)
+        
