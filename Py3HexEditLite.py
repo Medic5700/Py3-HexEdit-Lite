@@ -3,6 +3,45 @@ import math
 
 version = "v0.1"
 
+class Debug:
+    """Class for logging and debuging"""
+    def __init__(self, debugMode, file="Py3HexEditLite.log"):
+        self.__filename = file
+        self.showDebug = debugMode #Bool
+        
+    def __save(self, text):
+        """Function to save each log entry"""
+        logfile = open(self.__filename, 'a')
+        try:
+            logfile.write(text)
+        except:
+            self.err("Error Occured in Error Logging Function: Attempting to report previous error")
+            for i in text:
+                try:
+                    logfile.write(i)
+                except:
+                    logfile.write("[ERROR]")
+        logfile.close()
+    
+    def err(self, text):
+        """Takes string, pushes to stdout and saves it to the log file
+        
+        Mainly meant for non-recoverable errors that should cause the program to terminate"""
+        temp = "[" + time.asctime() + "] ERR: " + text
+        print(temp)
+        self.__save(temp + "\n")        
+    
+    def debug(self, *args):
+        """takes n number of strings, pushes to stdout and log file
+        
+        only writes input to stdout/log file when showDebug is True"""
+        if (self.showDebug):
+            temp = "Debug:"
+            for i in args:
+                temp += "\t" + str(i) + "\n"
+            print(temp, end="") #fixes issue where log and sceen output newlines don't match
+            self.__save(temp)
+
 def getch():
     import msvcrt #windows specific operations
     return msvcrt.getch()
