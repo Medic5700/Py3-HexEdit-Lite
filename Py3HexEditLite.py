@@ -120,7 +120,7 @@ Command Arg Arg Arg?
                 else:
                     temp += "."
         text += temp + "\n"
-    text += "Command Arg Arg Arg?"
+    text += "[" + mode+ "]"
     print(text)
 
 class WriteBuffer:
@@ -174,6 +174,7 @@ if __name__ == "__main__":
     fileName = filePath #TODO:include file name, excluding the path
     curserLocation = 0.0 #A real, since in hex, a byte is represented as 2 hex chars
     screenLocation = 0 #in multiples of 16
+    mode = "Hex"
     
     _interface(data, curserLocation, screenLocation)
     #import curses
