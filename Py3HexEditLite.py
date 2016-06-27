@@ -158,6 +158,9 @@ def right(x,y):
         temp = y
     return x+0.5, temp
 
+def save():
+    pass
+
 if __name__ == "__main__":
     filePath = None
     try:
@@ -187,12 +190,19 @@ if __name__ == "__main__":
     down = 224+80
     left = 224+75
     right = 224+77
+    Ctrl+S = 19
+    Ctrl+Q = 17
+    Ctrl+E = 5
+    Ctrl+Z = 26
+    Ctrl+Y = 25
+    Del = 224+83
     '''
     #getch()
     
+    #Keyboard input
     while True:
         temp = ord(getch())
-        if (temp == 224):
+        if (temp == 224): #arrow keys
             temp2 = ord(getch())
             if (temp2 == 72):
                 curserLocation, screenLocation = up(curserLocation, screenLocation)
@@ -202,7 +212,19 @@ if __name__ == "__main__":
                 curserLocation, screenLocation = left(curserLocation, screenLocation)
             if (temp2 == 77):
                 curserLocation, screenLocation = right(curserLocation, screenLocation)
-            print(temp2)
+        elif (temp == 19): #Ctrl+S
+            save()
+        elif (temp == 17): #Ctrl+Q
+            if (mode == "Hex"):
+                mode = "Text"
+            elif (mode == "Text"):
+                mode = "Hex"
+            else:
+                mode = "Hex"
+        elif (temp == 5): #Ctrl+E
+            mode = "Input"
+        elif (chr(temp) in "1234567890abcdefABCDEF"): #actual editing
+            pass
         print(temp)
         _interface(data, curserLocation, screenLocation)
         
