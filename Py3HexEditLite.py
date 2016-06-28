@@ -1,5 +1,6 @@
-import os
 import math
+import os
+import sys
 
 version = "v0.1"
 
@@ -228,6 +229,7 @@ if __name__ == "__main__":
 
     filePath = None
     try:
+        debug.debug("sys.argv", sys.argv)
         filePath = sys.argv[1]
     except:
         print("file has not been passed to argument")
