@@ -62,12 +62,14 @@ def _interface(data, curserLocation, screenLocation):
     """Prints file name, size of file, buffer status, and the hex editing interface"""
     #test interface
     text = "Py3HexEditLite " + version.ljust(8, " ") + "File:" + filePath.ljust(52," ") + "\n"
-    text += "Size:" + str(fileSize).rjust(8," ") + " B   Buffer:XXX%|XXX%  Location:" + hex(math.floor(curserLocation))[2:].upper().rjust(16, " ") + "."
+    text += "Size:" + str(fileSize).rjust(8," ") + " B Buffer:XXX%|XXX%  Location:" + ("0x" + hex(math.floor(curserLocation))[2:].upper()).rjust(18, " ")
+    '''
     if (math.floor(curserLocation) == curserLocation): #adds the hex decimal location, May have to correct for endienness
         text += "0"
     else:
         text += "8"
-    text += "/" + hex(fileSize)[2:].upper().rjust(16, " ") + "\n"
+    '''
+    text += "/" + ("0x" + hex(fileSize)[2:].upper()).rjust(18, " ") + "\n"
     for i in range(screenLocation//16,screenLocation//16 + 16): #TODO: this is a shortcut, fix it
         temp = hex(i*16)[2:].zfill(12) + "|"
         for j in range(0,8):
