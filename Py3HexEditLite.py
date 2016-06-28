@@ -162,6 +162,10 @@ def save():
     pass
 
 if __name__ == "__main__":
+    debug = Debug(True)
+    print("Starting Py3HexEditLite.py")
+    debug.debug("START PROGRAM================================================")
+    
     filePath = None
     try:
         filePath = sys.argv[1]
