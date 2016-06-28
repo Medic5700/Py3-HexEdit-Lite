@@ -115,12 +115,86 @@ def _interface(data, curserLocation, screenLocation):
         text += temp + "\n"
     text += "[" + mode+ "]"
     print(text)
-
+    
+'''
 class WriteBuffer:
-    pass
+    def __init__(self):
+        self.actions = []
+        self.redoStack = []
+    def undo(self):
+        """removes last action from action queue (appends to redo stack)"""
+        pass
+    def redo(self):
+        """Appends action from redo stack to action queue"""
+        pass
+    #ef write(self):
+    #   #resets redo buffer
+    #    pass
+    def __setitem__(self,key,value):
+        # https://docs.python.org/3/reference/datamodel.html#object.__setitem__
+        pass
+    def __getitam__(self,key):
+        # https://docs.python.org/3/reference/datamodel.html#object.__getitem__
+        pass
+    def __len__(self):
+        # https://docs.python.org/3/reference/datamodel.html#object.__len__
+        pass
+    def status(self):
+        """returns float representing how 'full' the buffer is as percentage"""
+        pass
 
 class ReadBuffer:
-    pass
+    def __init__(self):
+        self.fd = None
+        self.blocks = {}
+        self.blockSize = 1024*4
+    def __getitam__(self,key):
+        # https://docs.python.org/3/reference/datamodel.html#object.__getitem__
+        pass
+    def __len__(self):
+        # https://docs.python.org/3/reference/datamodel.html#object.__len__
+        pass
+    def status(self):
+        """returns float representing how 'full' the buffer is as percentage"""
+        pass
+'''
+
+class Buffer:
+    def __init__(self, filePath):
+        self.fd = None
+        self.blocks = {}
+        self.blockSize = 1024*4
+        self.actionQueue = []
+        self.redoStack = []
+    def __getitam__(self,key):
+        """returns bytearray"""
+        # https://docs.python.org/3/reference/datamodel.html#object.__getitem__
+        pass
+    def __len__(self):
+        """Returns length equal to the last last byte available/altered"""
+        # https://docs.python.org/3/reference/datamodel.html#object.__len__
+        pass
+    def __setitem__(self,key,value):
+        # https://docs.python.org/3/reference/datamodel.html#object.__setitem__
+        pass
+    def undo(self):
+        """removes last action from action queue (appends to redo stack)"""
+        pass
+    def redo(self):
+        """Appends action from redo stack to action queue"""
+        pass
+    def status(self):
+        """returns float representing how 'full' the buffer is as percentage"""
+        pass
+    def flag(self, start, finish):
+        """Returns array of bool signifying which bytes have been changed"""
+        pass
+    def close():
+        #remember to delete all the buffers
+        pass
+    def save():
+        #if editied file is smaller then original, create a copy to resize
+        pass
 
 def up(x,y):
     if (y > x - 16):
