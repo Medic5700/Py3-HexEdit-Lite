@@ -2,7 +2,7 @@ import math
 import os
 import sys
 
-version = "v0.1"
+version = "v0.2"
 
 class Debug:
     """Class for logging and debuging"""
@@ -43,21 +43,154 @@ class Debug:
             print(temp, end="") #fixes issue where log and sceen output newlines don't match
             self.__save(temp)
 
-def getch():
-    global debug
-    if (env == "WIN"):
-        return msvcrt.getch()
-    if (env == "UNIX"):
-        terminalFD = sys.stdin.fileno()
-        oldSetting = termios.tcgetattr(terminalFD)
-        try:
-            tty.setraw(sys.stdin.fileno())
-            ch = sys.stdin.read(1)
-        except:
-            debug.debug("Error reading input")
-        finally:
-            termios.tcsetattr(terminalFD, termios.TCSADRAIN, oldSetting)
-        return ch
+class Keyboard:
+    """A small class for handling AND parsing single character keyboard input"""
+    env = None
+    try:
+        import msvcrt #windows specific operations
+        env = "W"
+    except:
+        import tty #unix specific operation
+        import sys
+        import termios #unix specific operation
+        env = "L"
+    
+    def __init__(self):
+        self.regularKeys = "" #TODO: is this needed?
+        self.escape = {"L":0x1B,"W":0xE0}
+        #this looks backwards, but is meant to make it easy to edit these character bindings
+        self.specialKeys = {"CTRL+A"  :{"L":0x01      ,"W":0x01      },
+                            "CTRL+E"  :{"L":0x05      ,"W":0x05      },
+                            "CTRL+Q"  :{"L":0x11      ,"W":0x11      },
+                            "CTRL+S"  :{"L":0x13      ,"W":0x13      },
+                            "CTRL+Y"  :{"L":0x19      ,"W":0x19      },
+                            "CTRL+Z"  :{"L":0x1A      ,"W":0x1A      },
+                            "UP"      :{"L":0x1B5B41  ,"W":0xE048    },
+                            "DOWN"    :{"L":0x1B5B42  ,"W":0xE050    },
+                            "LEFT"    :{"L":0x1B5B44  ,"W":0xE04B    },
+                            "RIGHT"   :{"L":0x1B5B43  ,"W":0xE04D    },
+                            #"ESC"     :{"L":0x1B      ,"W":0x1B      } #problimatic since 0x1B is the linux escape character (I think?)
+                            "DEL"     :{"L":0x1B5B33  ,"W":0xE053    } #"L" should be 0x1B5B337E, but I'll ignore the 4th chr for simplicity
+                            }
+
+    def _getch(self):
+        """Gets a single raw character from the keyboard"""
+        # http://stackoverflow.com/questions/510357/python-read-a-single-character-from-the-user
+        if (self.env == "W"):
+            return self.msvcrt.getch()
+        if (self.env == "L"):
+            terminalFD = self.sys.stdin.fileno()
+            oldSetting = self.termios.tcgetattr(terminalFD)
+            try:
+                self.tty.setraw(self.sys.stdin.fileno())
+                ch = self.sys.stdin.read(1)
+            except:
+                pass
+            finally:
+                self.termios.tcsetattr(terminalFD, self.termios.TCSADRAIN, oldSetting)
+            return ch
+        
+    def getch(self):
+        """parses keyboard input, returns str representing keypress (IE: 'a', '1', 'Ctrl+Z')"""
+        raw = self._getch()
+        output = None
+        #print(str(raw))
+        if (ord(raw) == self.escape[self.env]):
+            if (self.env == "W"):
+                temp = ord(raw)*256 + ord(self._getch())
+            if (self.env == "L"):
+                temp = ord(raw)*256**2 + ord(self._getch())*256 + ord(self._getch())
+            #print(temp)
+            for i in self.specialKeys.keys():
+                if (self.specialKeys[i][self.env] == temp):
+                    return i
+        else:
+            for i in self.specialKeys.keys():
+                if (self.specialKeys[i][self.env] == ord(raw)):
+                    return i
+        return raw
+
+'''
+class WriteBuffer:
+    def __init__(self):
+        self.actions = []
+        self.redoStack = []
+    def undo(self):
+        """removes last action from action queue (appends to redo stack)"""
+        pass
+    def redo(self):
+        """Appends action from redo stack to action queue"""
+        pass
+    #ef write(self):
+    #   #resets redo buffer
+    #    pass
+    def __setitem__(self,key,value):
+        # https://docs.python.org/3/reference/datamodel.html#object.__setitem__
+        pass
+    def __getitam__(self,key):
+        # https://docs.python.org/3/reference/datamodel.html#object.__getitem__
+        pass
+    def __len__(self):
+        # https://docs.python.org/3/reference/datamodel.html#object.__len__
+        pass
+    def status(self):
+        """returns float representing how 'full' the buffer is as percentage"""
+        pass
+
+class ReadBuffer:
+    def __init__(self):
+        self.fd = None
+        self.blocks = {}
+        self.blockSize = 1024*4
+    def __getitam__(self,key):
+        # https://docs.python.org/3/reference/datamodel.html#object.__getitem__
+        pass
+    def __len__(self):
+        # https://docs.python.org/3/reference/datamodel.html#object.__len__
+        pass
+    def status(self):
+        """returns float representing how 'full' the buffer is as percentage"""
+        pass
+'''
+class Buffer:
+    def __init__(self, filePath):
+        self.fd = None
+        self.blocks = {}
+        self.blockSize = 1024*4
+        self.actionQueue = []
+        self.redoStack = []
+    def __getitam__(self,key):
+        """returns array of ints (NOT BYTES)
+        
+        will return array of ints, or None in cases where the byte has been deleted
+        """
+        # https://docs.python.org/3/reference/datamodel.html#object.__getitem__
+        pass
+    def __len__(self):
+        """Returns length equal to the last last byte available/altered"""
+        # https://docs.python.org/3/reference/datamodel.html#object.__len__
+        pass
+    def __setitem__(self,key,value):
+        # https://docs.python.org/3/reference/datamodel.html#object.__setitem__
+        pass
+    def undo(self):
+        """removes last action from action queue (appends to redo stack)"""
+        pass
+    def redo(self):
+        """Appends action from redo stack to action queue"""
+        pass
+    def status(self):
+        """returns float representing how 'full' the buffer is as percentage"""
+        pass
+    def flag(self, start, finish):
+        """Returns array of bool signifying which bytes have been changed"""
+        pass
+    def close():
+        #remember to delete all the buffers
+        pass
+    def save():
+        #if editied file is smaller then original, create a copy to resize
+        pass
 
 def _interface(data, curserLocation, screenLocation):
     """Prints file name, size of file, buffer status, and the hex editing interface"""
@@ -115,88 +248,9 @@ def _interface(data, curserLocation, screenLocation):
         text += temp + "\n"
     text += "[" + mode+ "]"
     print(text)
-    
-'''
-class WriteBuffer:
-    def __init__(self):
-        self.actions = []
-        self.redoStack = []
-    def undo(self):
-        """removes last action from action queue (appends to redo stack)"""
-        pass
-    def redo(self):
-        """Appends action from redo stack to action queue"""
-        pass
-    #ef write(self):
-    #   #resets redo buffer
-    #    pass
-    def __setitem__(self,key,value):
-        # https://docs.python.org/3/reference/datamodel.html#object.__setitem__
-        pass
-    def __getitam__(self,key):
-        # https://docs.python.org/3/reference/datamodel.html#object.__getitem__
-        pass
-    def __len__(self):
-        # https://docs.python.org/3/reference/datamodel.html#object.__len__
-        pass
-    def status(self):
-        """returns float representing how 'full' the buffer is as percentage"""
-        pass
 
-class ReadBuffer:
-    def __init__(self):
-        self.fd = None
-        self.blocks = {}
-        self.blockSize = 1024*4
-    def __getitam__(self,key):
-        # https://docs.python.org/3/reference/datamodel.html#object.__getitem__
-        pass
-    def __len__(self):
-        # https://docs.python.org/3/reference/datamodel.html#object.__len__
-        pass
-    def status(self):
-        """returns float representing how 'full' the buffer is as percentage"""
-        pass
-'''
-
-class Buffer:
-    def __init__(self, filePath):
-        self.fd = None
-        self.blocks = {}
-        self.blockSize = 1024*4
-        self.actionQueue = []
-        self.redoStack = []
-    def __getitam__(self,key):
-        """returns bytearray"""
-        # https://docs.python.org/3/reference/datamodel.html#object.__getitem__
-        pass
-    def __len__(self):
-        """Returns length equal to the last last byte available/altered"""
-        # https://docs.python.org/3/reference/datamodel.html#object.__len__
-        pass
-    def __setitem__(self,key,value):
-        # https://docs.python.org/3/reference/datamodel.html#object.__setitem__
-        pass
-    def undo(self):
-        """removes last action from action queue (appends to redo stack)"""
-        pass
-    def redo(self):
-        """Appends action from redo stack to action queue"""
-        pass
-    def status(self):
-        """returns float representing how 'full' the buffer is as percentage"""
-        pass
-    def flag(self, start, finish):
-        """Returns array of bool signifying which bytes have been changed"""
-        pass
-    def close():
-        #remember to delete all the buffers
-        pass
-    def save():
-        #if editied file is smaller then original, create a copy to resize
-        pass
-
-def up(x,y):
+def _up(x,y):
+    """Move curser up: takes current curser/screen location, returns new curser/screen location"""
     if (y > x - 16):
         temp = max(0, y - 16)
     else:
@@ -206,19 +260,22 @@ def up(x,y):
     else:
         temp2 = x - 16
     return temp2, temp
-def down(x,y):
+def _down(x,y):
+    """Move curser down: takes current curser/screen location, returns new curser/screen location"""
     if (((x + 16)// 16) * 16 - y) >= 256:
         temp = y + 16
     else:
         temp = y        
     return x+16, temp
-def left(x,y):
+def _left(x,y):
+    """Move curser left: takes current curser/screen location, returns new curser/screen location"""
     if (y > x - 0.5):
         temp = max(0, y - 16)
     else:
         temp = y    
     return max(0,x-0.5), temp
-def right(x,y):
+def _right(x,y):
+    """Move curser right: takes current curser/screen location, returns new curser/screen location"""
     if (((x + 0.5)// 16) * 16 - y) >= 256:
         temp = y + 16
     else:
@@ -227,78 +284,21 @@ def right(x,y):
 
 def save():
     pass
-
-class Keyboard:
-    """A small class for handling AND parsing single character keyboard input"""
-    env = None
-    try:
-        import msvcrt #windows specific operations
-        env = "W"
-    except:
-        import tty #unix specific operation
-        import sys
-        import termios #unix specific operation
-        env = "L"
-    
-    def __init__(self):
-        self.regularKeys = "" #TODO: is this needed?
-        self.escape = {"L":0x1B,"W":0xE0}
-        #this looks backwards, but is meant to make it easy to edit these character bindings
-        self.specialKeys = {"CTRL+A"  :{"L":0x01      ,"W":0x01      },
-                            "CTRL+E"  :{"L":0x05      ,"W":0x05      },
-                            "CTRL+Q"  :{"L":0x11      ,"W":0x11      },
-                            "CTRL+S"  :{"L":0x13      ,"W":0x13      },
-                            "CTRL+Y"  :{"L":0x19      ,"W":0x19      },
-                            "CTRL+Z"  :{"L":0x1A      ,"W":0x1A      },
-                            "UP"      :{"L":0x1B5B41  ,"W":0xE048    },
-                            "DOWN"    :{"L":0x1B5B42  ,"W":0xE050    },
-                            "LEFT"    :{"L":0x1B5B44  ,"W":0xE04B    },
-                            "RIGHT"   :{"L":0x1B5B43  ,"W":0xE04D    },
-                            "DEL"     :{"L":0x1B5B33  ,"W":0xE053    } #"L" should be 0x1B5B337E, but I'll ignore the 4th chr for simplicity
-                            #"ESC"     :{"L":0x1B      ,"W":0x1B      } #problimatic since 0x1B is the linux escape character (I think?)
-                            }
-    def _getch(self):
-        """Gets a single raw character from the keyboard"""
-        # http://stackoverflow.com/questions/510357/python-read-a-single-character-from-the-user
-        if (self.env == "W"):
-            return self.msvcrt.getch()
-        if (self.env == "L"):
-            terminalFD = self.sys.stdin.fileno()
-            oldSetting = self.termios.tcgetattr(terminalFD)
-            try:
-                self.tty.setraw(self.sys.stdin.fileno())
-                ch = self.sys.stdin.read(1)
-            except:
-                pass
-            finally:
-                self.termios.tcsetattr(terminalFD, self.termios.TCSADRAIN, oldSetting)
-            return ch
-        
-    def getch(self):
-        """parses keyboard input, returns str representing keypress (IE: 'a', '1', 'Ctrl+Z')"""
-        raw = self._getch()
-        output = None
-        #print(str(raw))
-        if (ord(raw) == self.escape[self.env]):
-            if (self.env == "W"):
-                temp = ord(raw)*256 + ord(self._getch())
-            if (self.env == "L"):
-                temp = ord(raw)*256**2 + ord(self._getch())*256 + ord(self._getch())
-            #print(temp)
-            for i in self.specialKeys.keys():
-                if (self.specialKeys[i][self.env] == temp):
-                    return i
-        else:
-            for i in self.specialKeys.keys():
-                if (self.specialKeys[i][self.env] == ord(raw)):
-                    return i
-        return raw
-
+def openfile(filePath):
+    pass
+def new(filePath):
+    pass
+def quit():
+    pass
+def goto(x):
+    pass
+def find(x):
+    pass
 
 if __name__ == "__main__":
     debug = Debug(True)
     print("Starting Py3HexEditLite.py")
-    debug.debug("START PROGRAM================================================")
+    debug.debug("Starting Py3HexEditLite.py===================================")
 
     filePath = None
     try:
@@ -317,35 +317,31 @@ if __name__ == "__main__":
     data = file.read()
     
     fileSize = os.path.getsize(filePath)
-    fileName = filePath #TODO:include file name, excluding the path
     curserLocation = 0.0 #A real, since in hex, a byte is represented as 2 hex chars
     screenLocation = 0 #in multiples of 16
     mode = "Hex"
     
-    _interface(data, curserLocation, screenLocation)
-    
-    keyboard = Keyboard()
     #Keyboard input
+    keyboard = Keyboard()
     while (True):
+        _interface(data, curserLocation, screenLocation)
         raw = keyboard.getch()
+        debug.debug("variable \"raw\"", type(raw),len(raw),str(raw))
         if (raw == "UP"):
-            curserLocation, screenLocation = up(curserLocation, screenLocation)
+            curserLocation, screenLocation = _up(curserLocation, screenLocation)
         elif (raw == "DOWN"):
-            curserLocation, screenLocation = down(curserLocation, screenLocation)
+            curserLocation, screenLocation = _down(curserLocation, screenLocation)
         elif (raw == "LEFT"):
-            curserLocation, screenLocation = left(curserLocation, screenLocation)
+            curserLocation, screenLocation = _left(curserLocation, screenLocation)
         elif (raw == "RIGHT"):
-            curserLocation, screenLocation = right(curserLocation, screenLocation)
+            curserLocation, screenLocation = _right(curserLocation, screenLocation)
         elif (raw == "CTRL+Q"):
             if (mode == "Hex"):
                 mode = "Text"
             elif (mode == "Text"):
-                mode = "Hex"
-            else:
-                mode = "Hex"            
-        elif (raw == "CTRL+E"):
-            mode = "Input"
-        #elif (chr(temp) in "1234567890abcdefABCDEF"):
-        #    pass
-        
-        _interface(data, curserLocation, screenLocation)
+                mode = "Hex"         
+        #elif (raw == "CTRL+E"): #TODO
+        #    mode = "Input"
+        elif (len(raw) == 1):
+            if (chr(ord(raw)) in "1234567890abcdefABCDEF"):
+                debug.debug("raw 1", raw)
