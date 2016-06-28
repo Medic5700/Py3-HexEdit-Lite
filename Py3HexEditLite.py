@@ -152,6 +152,73 @@ def right(x,y):
 def save():
     pass
 
+class Keyboard:
+    """A small class for handling AND parsing single character keyboard input"""
+    env = None
+    try:
+        import msvcrt #windows specific operations
+        env = "W"
+    except:
+        import tty #unix specific operation
+        import sys
+        import termios #unix specific operation
+        env = "L"
+    
+    def __init__(self):
+        self.regularKeys = "" #TODO: is this needed?
+        self.escape = {"L":0x1B,"W":0xE0}
+        #this looks backwards, but is meant to make it easy to edit these character bindings
+        self.specialKeys = {"CTRL+A"  :{"L":0x01      ,"W":0x01      },
+                            "CTRL+E"  :{"L":0x05      ,"W":0x05      },
+                            "CTRL+Q"  :{"L":0x11      ,"W":0x11      },
+                            "CTRL+S"  :{"L":0x13      ,"W":0x13      },
+                            "CTRL+Y"  :{"L":0x19      ,"W":0x19      },
+                            "CTRL+Z"  :{"L":0x1A      ,"W":0x1A      },
+                            "UP"      :{"L":0x1B5B41  ,"W":0xE048    },
+                            "DOWN"    :{"L":0x1B5B42  ,"W":0xE050    },
+                            "LEFT"    :{"L":0x1B5B44  ,"W":0xE04B    },
+                            "RIGHT"   :{"L":0x1B5B43  ,"W":0xE04D    },
+                            "DEL"     :{"L":0x1B5B33  ,"W":0xE053    } #"L" should be 0x1B5B337E, but I'll ignore the 4th chr for simplicity
+                            #"ESC"     :{"L":0x1B      ,"W":0x1B      } #problimatic since 0x1B is the linux escape character (I think?)
+                            }
+    def _getch(self):
+        """Gets a single raw character from the keyboard"""
+        # http://stackoverflow.com/questions/510357/python-read-a-single-character-from-the-user
+        if (self.env == "W"):
+            return self.msvcrt.getch()
+        if (self.env == "L"):
+            terminalFD = self.sys.stdin.fileno()
+            oldSetting = self.termios.tcgetattr(terminalFD)
+            try:
+                self.tty.setraw(self.sys.stdin.fileno())
+                ch = self.sys.stdin.read(1)
+            except:
+                pass
+            finally:
+                self.termios.tcsetattr(terminalFD, self.termios.TCSADRAIN, oldSetting)
+            return ch
+        
+    def getch(self):
+        """parses keyboard input, returns str representing keypress (IE: 'a', '1', 'Ctrl+Z')"""
+        raw = self._getch()
+        output = None
+        #print(str(raw))
+        if (ord(raw) == self.escape[self.env]):
+            if (self.env == "W"):
+                temp = ord(raw)*256 + ord(self._getch())
+            if (self.env == "L"):
+                temp = ord(raw)*256**2 + ord(self._getch())*256 + ord(self._getch())
+            #print(temp)
+            for i in self.specialKeys.keys():
+                if (self.specialKeys[i][self.env] == temp):
+                    return i
+        else:
+            for i in self.specialKeys.keys():
+                if (self.specialKeys[i][self.env] == ord(raw)):
+                    return i
+        return raw
+
+
 if __name__ == "__main__":
     debug = Debug(True)
     print("Starting Py3HexEditLite.py")
@@ -198,20 +265,6 @@ if __name__ == "__main__":
     mode = "Hex"
     
     _interface(data, curserLocation, screenLocation)
-    #import curses
-    '''
-    up = W224+72, L27+91+65
-    down = W224+80, L27+91+66
-    left = W224+75, L27+91+68
-    right = W224+77, L27+91+67
-    Ctrl+S = WL19
-    Ctrl+Q = WL17
-    Ctrl+E = WL5
-    Ctrl+Z = WL26
-    Ctrl+Y = WL25
-    Del = W224+83, L27+91+51+126
-    '''
-    #getch()
     
     #Keyboard input
     while True:
