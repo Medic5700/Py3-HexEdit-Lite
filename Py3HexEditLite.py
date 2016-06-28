@@ -125,7 +125,7 @@ def up(x,y):
         temp = max(0, y - 16)
     else:
         temp = y
-    if (x <= 16):
+    if (x < 16):
         temp2 = x
     else:
         temp2 = x - 16
