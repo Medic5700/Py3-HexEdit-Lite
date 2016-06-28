@@ -223,25 +223,6 @@ if __name__ == "__main__":
     debug = Debug(True)
     print("Starting Py3HexEditLite.py")
     debug.debug("START PROGRAM================================================")
-    
-    env = None
-    try:
-        import msvcrt #windows specific operations
-        debug.debug("Machine is Windows")
-        env = "WIN"
-    except:
-        debug.debug("Machine is not Windows")
-    try:
-        #unix input will take priority?
-        import tty
-        import sys
-        import termios
-        env = "UNIX"
-        debug.debug("Machine is Unix")
-    except:
-        debug.debug("Machine is not Unix")
-    debug.debug("env = " + str(env))
-
 
     filePath = None
     try:
