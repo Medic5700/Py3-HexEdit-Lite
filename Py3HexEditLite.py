@@ -43,8 +43,20 @@ class Debug:
             self.__save(temp)
 
 def getch():
-    import msvcrt #windows specific operations
-    return msvcrt.getch()
+    global debug
+    if (env == "WIN"):
+        return msvcrt.getch()
+    if (env == "UNIX"):
+        terminalFD = sys.stdin.fileno()
+        oldSetting = termios.tcgetattr(terminalFD)
+        try:
+            tty.setraw(sys.stdin.fileno())
+            ch = sys.stdin.read(1)
+        except:
+            debug.debug("Error reading input")
+        finally:
+            termios.tcsetattr(terminalFD, termios.TCSADRAIN, oldSetting)
+        return ch
 
 def _interface(data, curserLocation, screenLocation):
     """Prints file name, size of file, buffer status, and the hex editing interface"""
@@ -166,6 +178,25 @@ if __name__ == "__main__":
     print("Starting Py3HexEditLite.py")
     debug.debug("START PROGRAM================================================")
     
+    env = None
+    try:
+        import msvcrt #windows specific operations
+        debug.debug("Machine is Windows")
+        env = "WIN"
+    except:
+        debug.debug("Machine is not Windows")
+    try:
+        #unix input will take priority?
+        import tty
+        import sys
+        import termios
+        env = "UNIX"
+        debug.debug("Machine is Unix")
+    except:
+        debug.debug("Machine is not Unix")
+    debug.debug("env = " + str(env))
+
+
     filePath = None
     try:
         filePath = sys.argv[1]
@@ -190,16 +221,16 @@ if __name__ == "__main__":
     _interface(data, curserLocation, screenLocation)
     #import curses
     '''
-    up = 224+72
-    down = 224+80
-    left = 224+75
-    right = 224+77
-    Ctrl+S = 19
-    Ctrl+Q = 17
-    Ctrl+E = 5
-    Ctrl+Z = 26
-    Ctrl+Y = 25
-    Del = 224+83
+    up = W224+72, L27+91+65
+    down = W224+80, L27+91+66
+    left = W224+75, L27+91+68
+    right = W224+77, L27+91+67
+    Ctrl+S = WL19
+    Ctrl+Q = WL17
+    Ctrl+E = WL5
+    Ctrl+Z = WL26
+    Ctrl+Y = WL25
+    Del = W224+83, L27+91+51+126
     '''
     #getch()
     
