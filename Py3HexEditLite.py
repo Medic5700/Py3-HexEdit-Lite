@@ -266,32 +266,28 @@ if __name__ == "__main__":
     
     _interface(data, curserLocation, screenLocation)
     
+    keyboard = Keyboard()
     #Keyboard input
-    while True:
-        temp = ord(getch())
-        if (temp == 224): #arrow keys
-            temp2 = ord(getch())
-            if (temp2 == 72):
-                curserLocation, screenLocation = up(curserLocation, screenLocation)
-            if (temp2 == 80):
-                curserLocation, screenLocation = down(curserLocation, screenLocation)
-            if (temp2 == 75):
-                curserLocation, screenLocation = left(curserLocation, screenLocation)
-            if (temp2 == 77):
-                curserLocation, screenLocation = right(curserLocation, screenLocation)
-        elif (temp == 19): #Ctrl+S
-            save()
-        elif (temp == 17): #Ctrl+Q
+    while (True):
+        raw = keyboard.getch()
+        if (raw == "UP"):
+            curserLocation, screenLocation = up(curserLocation, screenLocation)
+        elif (raw == "DOWN"):
+            curserLocation, screenLocation = down(curserLocation, screenLocation)
+        elif (raw == "LEFT"):
+            curserLocation, screenLocation = left(curserLocation, screenLocation)
+        elif (raw == "RIGHT"):
+            curserLocation, screenLocation = right(curserLocation, screenLocation)
+        elif (raw == "CTRL+Q"):
             if (mode == "Hex"):
                 mode = "Text"
             elif (mode == "Text"):
                 mode = "Hex"
             else:
-                mode = "Hex"
-        elif (temp == 5): #Ctrl+E
+                mode = "Hex"            
+        elif (raw == "CTRL+E"):
             mode = "Input"
-        elif (chr(temp) in "1234567890abcdefABCDEF"): #actual editing
-            pass
-        print(temp)
-        _interface(data, curserLocation, screenLocation)
+        #elif (chr(temp) in "1234567890abcdefABCDEF"):
+        #    pass
         
+        _interface(data, curserLocation, screenLocation)
