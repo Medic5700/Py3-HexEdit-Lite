@@ -160,22 +160,62 @@ class Buffer:
         self.file = open(filePath,'r+b') #assume filepath is valid
         self.blocks = {} #contains {Offset:(lastAccessTime, bytearray)}
         self.blockSize = 16 #1024*4
-        self.actionQueue = [[],[]] #has Offset, data
+        self.actionQueue = [] #contains actions as an ordered list of tuples (offset, data)
         self.redoStack = []
-    def __getitam__(self,key):
+        
+        self._cacheMiss(0x00)
+        debug.debug("buffer Blocks", self.blocks)
+        
+    def __delitem__(self,key):
+        # https://docs.python.org/3/reference/datamodel.html#object.__delitem__
+        self.actionQueue.append((key,None))
+        
+    def __getitem__(self,key):
         """returns array of ints (NOT BYTES)
         
         will return array of ints, or None in cases where the byte has been deleted
+        DO NOT itterate over with a for loop, IndexError will not be raised
         """
         # https://docs.python.org/3/reference/datamodel.html#object.__getitem__
-        pass
+        if (isinstance(key,slice)):
+            #print("Slice stuff:", key.start, key.stop, key.step)
+            step = 1
+            if (key.step != None):
+                step = key.step
+            i = key.start
+            temp = []
+            while (i<key.stop):
+                if (self._inCache(i) == False):
+                    self._cacheMiss(i)
+                temp.append(self.blocks[(i // self.blockSize) * self.blockSize][i - (i // self.blockSize) * self.blockSize])
+                i += step
+            
+            for i in self.actionQueue:
+                if ((i[0] >= key.start) and (i[0] < key.stop) and (i[0] % step == key.start % step)):
+                    temp[(i[0] - key.start) // step] = i[1]
+                
+                
+            return temp
+        else: #it's a regular int
+            if (self._inCache(key) == False):
+                self._cacheMiss(key)
+            temp = self.blocks[(key // self.blockSize) * self.blockSize][key - (key // self.blockSize) * self.blockSize]
+            for i in self.actionQueue:
+                if (i[0] == key):
+                    temp = i[1]
+            return temp
+        
     def __len__(self):
         """Returns length equal to the last last byte available/altered"""
         # https://docs.python.org/3/reference/datamodel.html#object.__len__
-        pass
+        temp = self.os.path.getsize(self.filePath)
+        for i in self.actionQueue:
+            if (i[0] > temp):
+                temp = i[0]
+        return temp
     def __setitem__(self,key,value):
         # https://docs.python.org/3/reference/datamodel.html#object.__setitem__
-        pass
+        self.actionQueue.append((key,value))
     
     def _inCache(self,offset):
         if ((offset // self.blockSize) * self.blockSize in self.blocks.keys()):
@@ -187,6 +227,8 @@ class Buffer:
         """loads a block of the file into memeory"""
         #Assume _inCache() has already been called
         closestBlock = (offset // self.blockSize) * self.blockSize
+        if (len(self.blocks) >= 8):
+            self._cacheEvict(closestBlock)
         fileSize = self.os.path.getsize(self.filePath)
         block = []
         if (closestBlock > fileSize):
@@ -199,6 +241,15 @@ class Buffer:
             for i in range(len(temp),self.blockSize):
                 block.append(None)
         self.blocks[closestBlock] = block
+    def _cacheEvict(self,current):
+        """Takes the current location of read, evicts block from memory that isn't current"""
+        # evict furthest block from current block
+        closestBlock = (current // self.blockSize) * self.blockSize
+        furthestBlock = closestBlock
+        for i in list(self.blocks.keys()):
+            if (abs(closestBlock - i) > abs(closestBlock - furthestBlock)):
+                furthestBlock = i
+        del(self.blocks[furthestBlock])
         
     def undo(self):
         """removes last action from action queue (appends to redo stack)"""
@@ -212,10 +263,10 @@ class Buffer:
     def flag(self, start, finish):
         """Returns array of bool signifying which bytes have been changed"""
         pass
-    def close():
+    def close(self):
         #remember to delete all the buffers
-        pass
-    def save():
+        self.file.close()
+    def save(self):
         #if editied file is smaller then original, create a copy to resize
         pass
 
