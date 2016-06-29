@@ -153,11 +153,14 @@ class ReadBuffer:
         pass
 '''
 class Buffer:
+    import os
+    import math
     def __init__(self, filePath):
-        self.fd = None
-        self.blocks = {}
-        self.blockSize = 1024*4
-        self.actionQueue = []
+        self.filePath = filePath
+        self.file = open(filePath,'r+b') #assume filepath is valid
+        self.blocks = {} #contains {Offset:(lastAccessTime, bytearray)}
+        self.blockSize = 16 #1024*4
+        self.actionQueue = [[],[]] #has Offset, data
         self.redoStack = []
     def __getitam__(self,key):
         """returns array of ints (NOT BYTES)
