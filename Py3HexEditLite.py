@@ -228,6 +228,9 @@ class Buffer:
     
     def close(self):
         #remember to delete all the buffers
+        del(self.actionQueue[:])
+        del(self.redoStack[:])
+        del(self.blocks)
         self.file.close()
         
     def save(self):
@@ -374,6 +377,7 @@ def save():
     buffer.save()
     
     pass
+
 def openfile(filePath):
     global buffer
     if (os.path.exists(filePath) == False):
@@ -389,10 +393,16 @@ def openfile(filePath):
     return "Successfully opened file: " + filePath
 def new(filePath):
     pass
+
 def quit():
-    pass
+    global buffer
+    global debug
+    buffer.close()
+    del(debug)
+    
 def goto(x):
     pass
+
 def find(x):
     pass
 
