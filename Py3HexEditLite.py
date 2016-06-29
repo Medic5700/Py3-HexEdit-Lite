@@ -176,6 +176,30 @@ class Buffer:
     def __setitem__(self,key,value):
         # https://docs.python.org/3/reference/datamodel.html#object.__setitem__
         pass
+    
+    def _inCache(self,offset):
+        if ((offset // self.blockSize) * self.blockSize in self.blocks.keys()):
+            return True
+        else:
+            return False
+    
+    def _cacheMiss(self,offset):
+        """loads a block of the file into memeory"""
+        #Assume _inCache() has already been called
+        closestBlock = (offset // self.blockSize) * self.blockSize
+        fileSize = self.os.path.getsize(self.filePath)
+        block = []
+        if (closestBlock > fileSize):
+            block = [None for i in range(0,self.blockSize)]
+        else:
+            self.file.seek(closestBlock)
+            temp = self.file.read(self.blockSize)
+            for i in range(0,len(temp)):
+                block.append(temp[i]) #temp[i] is int
+            for i in range(len(temp),self.blockSize):
+                block.append(None)
+        self.blocks[closestBlock] = block
+        
     def undo(self):
         """removes last action from action queue (appends to redo stack)"""
         pass
