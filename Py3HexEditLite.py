@@ -231,8 +231,21 @@ class Buffer:
         self.file.close()
         
     def save(self):
-        #if editied file is smaller then original, create a copy to resize
-        pass
+        """Writes the actions to file"""
+        #TODO: if editied file is smaller then original, create a copy to resize
+        for i in self.actionQueue:
+            self.file.seek(i[0])
+            if (i[1] == None):
+                self.file.write((0).to_bytes(1, sys.byteorder))
+                print("writing: " + str((0).to_bytes(1, sys.byteorder)))
+            else:
+                self.file.write((i[1]).to_bytes(1, sys.byteorder))
+                print("writing: " + str((i[1]).to_bytes(1, sys.byteorder)))
+        self.file.flush()
+        del(self.actionQueue[:])
+        del(self.redoStack[:])
+        for i in list(self.blocks.keys()):
+            del(self.blocks[i])
 
 def _interface(data, curserLocation, screenLocation):
     """Prints file name, size of file, buffer status, and the hex editing interface"""
@@ -357,6 +370,9 @@ def _write(location, byte):
 
 # API, accessable by user in 'Input' mode
 def save():
+    global buffer
+    buffer.save()
+    
     pass
 def openfile(filePath):
     global buffer
@@ -463,4 +479,6 @@ if __name__ == "__main__":
             if (chr(ord(raw)) in "1234567890abcdefABCDEF"):
                 _write(curserLocation, raw)
                 debug.debug("raw 1", raw)
+        elif (raw == "CTRL+S"):
+            save()
                 
