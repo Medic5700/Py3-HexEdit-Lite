@@ -287,14 +287,14 @@ def _interface(data, curserLocation, screenLocation):
             temp += " "
             if (curserLocation == i*16+j): #large 4 bits
                 temp += "-"
-            elif (len(data) <= i*16+j):
+            elif (data[i*16+j] == None):
                 temp += "_"
             else:
                 temp += hex(data[i*16+j] // 16)[2:].upper()
             
             if (curserLocation == i*16+j+0.5): #small 4 bits
                 temp += "-"
-            elif (len(data) <= i*16+j):
+            elif (data[i*16+j] == None):
                 temp += "_"
             else:
                 temp += hex(data[i*16+j] % 16)[2:].upper()
@@ -303,26 +303,25 @@ def _interface(data, curserLocation, screenLocation):
             temp += " "
             if (curserLocation == i*16+j): #large 4 bits
                 temp += "-"
-            elif (len(data) <= i*16+j):
+            elif (data[i*16+j] == None):
                 temp += "_"
             else:
                 temp += hex(data[i*16+j] // 16)[2:].upper()
             
             if (curserLocation == i*16+j+0.5): #small 4 bits
                 temp += "-"
-            elif (len(data) <= i*16+j):
+            elif (data[i*16+j] == None):
                 temp += "_"
             else:
                 temp += hex(data[i*16+j] % 16)[2:].upper()
         temp += "| "
         for j in range(0,16):
-            if i*16+j >= len(data):
+            if (data[i*16+j] == None):
                 temp += " "
+            elif chr(data[i*16+j]).isprintable():
+                temp += chr(data[i*16+j])
             else:
-                if chr(data[i*16+j]).isprintable():
-                    temp += chr(data[i*16+j])
-                else:
-                    temp += "."
+                temp += "."
         text += temp + "\n"
     text += "[" + mode+ "]"
     print(text)
