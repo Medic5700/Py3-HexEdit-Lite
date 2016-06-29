@@ -391,8 +391,7 @@ if __name__ == "__main__":
     print("Py3HexEditLite " + version + " has started")
     print("Attempting to Open file: " + filePath)
     
-    file = open(filePath,'rb')
-    data = file.read()
+    buffer = Buffer(filePath)
     
     fileSize = os.path.getsize(filePath)
     curserLocation = 0.0 #A real, since in hex, a byte is represented as 2 hex chars
@@ -402,7 +401,8 @@ if __name__ == "__main__":
     #Keyboard input
     keyboard = Keyboard()
     while (True):
-        _interface(data, curserLocation, screenLocation)
+        _interface(buffer, curserLocation, screenLocation)
+        
         raw = keyboard.getch()
         debug.debug("variable \"raw\"", type(raw),len(raw),str(raw))
         if (raw == "UP"):
