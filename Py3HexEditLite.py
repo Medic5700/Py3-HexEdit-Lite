@@ -371,14 +371,22 @@ def _right():
     curserLocation = curserLocation + 0.5
     screenLocation = temp
 
+# API, accessable by user in 'Input' mode
 def save():
     pass
 def openfile(filePath):
+    global buffer
     if (os.path.exists(filePath) == False):
-        commandMessage = "ERROR: filepath does not exist"
-        return -1
+        return "ERROR: filepath does not exist" #TODO: raise an error
+    if (os.path.isfile(filePath) == False):
+        return "ERROR: filepath is not a file" #TODO: raise an error
     else:
-        fileBuffer = Buffer(filePath)
+        try:
+            buffer = Buffer(filePath)
+        except:
+            buffer = None
+            return "ERROR: could not open file: " + filePath
+    return "Successfully opened file: " + filePath
 def new(filePath):
     pass
 def quit():
@@ -403,32 +411,39 @@ def _write(location, byte):
         buffer[int(math.floor(location))] = (buffer[int(math.floor(location))] // 16) * 16 + number
         _right()
     else:
-        debug.debug("_write error")
+        return "Write Error"
+    return 1
         
 if __name__ == "__main__":
     debug = Debug(True)
     print("Starting Py3HexEditLite.py")
     debug.debug("Starting Py3HexEditLite.py===================================")
-
-    filePath = None
-    try:
-        debug.debug("sys.argv", sys.argv)
-        filePath = sys.argv[1]
-    except:
-        print("file has not been passed to argument")
-        filePath = ""
-        while (os.path.exists(filePath) == False):
-            filePath = input("Enter a file path:")
-        
     print("Py3HexEditLite " + version + " has started")
-    print("Attempting to Open file: " + filePath)
     
-    buffer = Buffer(filePath)
-    
-    fileSize = os.path.getsize(filePath)
     curserLocation = 0.0 #A real, since in hex, a byte is represented as 2 hex chars
     screenLocation = 0 #in multiples of 16
     mode = "Hex"
+    commandMessage = ""
+    buffer = None
+    filePath = None
+    
+    if (len(sys.argv) >= 2):
+        try:
+            buffer = Buffer(sys.argv[1])
+        except:
+            print("Could not open file at " + str(sys.argv[1]))
+
+    print("program has not been passed an argument")
+    while (buffer == None):
+        filePath = input("Enter a file path:")
+        print(openfile(filePath))
+        
+    #print("Attempting to Open file: " + filePath)
+    #buffer = Buffer(filePath)
+    
+    fileSize = os.path.getsize(filePath)
+
+    #_write(curserLocation, None)
     
     #Keyboard input
     keyboard = Keyboard()
