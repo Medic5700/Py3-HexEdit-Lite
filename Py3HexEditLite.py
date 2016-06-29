@@ -391,11 +391,15 @@ def _write(location, byte):
     global curserLocation
     global screenLocation
     debug.debug("_write", location, byte)
-    number = int(byte,16)
-    if ((location - math.floor(location)) == 0):
+    
+    if (byte == None):
+        buffer[int(math.floor(location))] = None
+    elif ((location - math.floor(location)) == 0):
+        number = int(byte,16)
         buffer[int(math.floor(location))] = number*16 + (buffer[int(math.floor(location))] % 16)
         _right()
     elif ((location - math.floor(location)) == 0.5):
+        number = int(byte,16)
         buffer[int(math.floor(location))] = (buffer[int(math.floor(location))] // 16) * 16 + number
         _right()
     else:
@@ -448,7 +452,10 @@ if __name__ == "__main__":
                 mode = "Hex"         
         #elif (raw == "CTRL+E"): #TODO
         #    mode = "Input"
+        elif (raw == "DEL"):
+            _write(curserLocation, None)
         elif (len(raw) == 1):
             if (chr(ord(raw)) in "1234567890abcdefABCDEF"):
                 _write(curserLocation, raw)
                 debug.debug("raw 1", raw)
+                
