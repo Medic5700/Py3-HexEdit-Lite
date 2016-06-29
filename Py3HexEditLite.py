@@ -327,43 +327,59 @@ def _interface(data, curserLocation, screenLocation):
     text += "[" + mode+ "]"
     print(text)
 
-def _up(x,y):
+def _up():
     """Move curser up: takes current curser/screen location, returns new curser/screen location"""
-    if (y > x - 16):
-        temp = max(0, y - 16)
+    global curserLocation
+    global screenLocation    
+    if (screenLocation > curserLocation - 16):
+        temp = max(0, screenLocation - 16)
     else:
-        temp = y
-    if (x < 16):
-        temp2 = x
+        temp = screenLocation
+    if (curserLocation < 16):
+        temp2 = curserLocation
     else:
-        temp2 = x - 16
-    return temp2, temp
-def _down(x,y):
+        temp2 = curserLocation - 16
+    curserLocation = temp2
+    screenLocation = temp
+def _down():
     """Move curser down: takes current curser/screen location, returns new curser/screen location"""
-    if (((x + 16)// 16) * 16 - y) >= 256:
-        temp = y + 16
+    global curserLocation
+    global screenLocation    
+    if (((curserLocation + 16)// 16) * 16 - screenLocation) >= 256:
+        temp = screenLocation + 16
     else:
-        temp = y        
-    return x+16, temp
-def _left(x,y):
+        temp = screenLocation
+    curserLocation = curserLocation + 16
+    screenLocation = temp
+def _left():
     """Move curser left: takes current curser/screen location, returns new curser/screen location"""
-    if (y > x - 0.5):
-        temp = max(0, y - 16)
+    global curserLocation
+    global screenLocation    
+    if (screenLocation > curserLocation - 0.5):
+        temp = max(0, screenLocation - 16)
     else:
-        temp = y    
-    return max(0,x-0.5), temp
-def _right(x,y):
+        temp = screenLocation
+    curserLocation = max(0, curserLocation - 0.5)
+    screenLocation = temp
+def _right():
     """Move curser right: takes current curser/screen location, returns new curser/screen location"""
-    if (((x + 0.5)// 16) * 16 - y) >= 256:
-        temp = y + 16
+    global curserLocation
+    global screenLocation    
+    if (((curserLocation + 0.5)// 16) * 16 - screenLocation) >= 256:
+        temp = screenLocation + 16
     else:
-        temp = y
-    return x+0.5, temp
+        temp = screenLocation
+    curserLocation = curserLocation + 0.5
+    screenLocation = temp
 
 def save():
     pass
 def openfile(filePath):
-    pass
+    if (os.path.exists(filePath) == False):
+        commandMessage = "ERROR: filepath does not exist"
+        return -1
+    else:
+        fileBuffer = Buffer(filePath)
 def new(filePath):
     pass
 def quit():
@@ -379,10 +395,10 @@ def _write(location, byte):
     number = int(byte,16)
     if ((location - math.floor(location)) == 0):
         buffer[int(math.floor(location))] = number*16 + (buffer[int(math.floor(location))] % 16)
-        curserLocation, screenLocation = _right(curserLocation, screenLocation)
+        _right()
     elif ((location - math.floor(location)) == 0.5):
         buffer[int(math.floor(location))] = (buffer[int(math.floor(location))] // 16) * 16 + number
-        curserLocation, screenLocation = _right(curserLocation, screenLocation)
+        _right()
     else:
         debug.debug("_write error")
         
@@ -419,13 +435,13 @@ if __name__ == "__main__":
         raw = keyboard.getch()
         debug.debug("variable \"raw\"", type(raw),len(raw),str(raw))
         if (raw == "UP"):
-            curserLocation, screenLocation = _up(curserLocation, screenLocation)
+            _up()
         elif (raw == "DOWN"):
-            curserLocation, screenLocation = _down(curserLocation, screenLocation)
+            _down()
         elif (raw == "LEFT"):
-            curserLocation, screenLocation = _left(curserLocation, screenLocation)
+            _left()
         elif (raw == "RIGHT"):
-            curserLocation, screenLocation = _right(curserLocation, screenLocation)
+            _right()
         elif (raw == "CTRL+Q"):
             if (mode == "Hex"):
                 mode = "Text"
