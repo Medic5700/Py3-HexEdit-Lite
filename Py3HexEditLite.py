@@ -372,7 +372,20 @@ def goto(x):
     pass
 def find(x):
     pass
-
+def _write(location, byte):
+    global curserLocation
+    global screenLocation
+    debug.debug("_write", location, byte)
+    number = int(byte,16)
+    if ((location - math.floor(location)) == 0):
+        buffer[int(math.floor(location))] = number*16 + (buffer[int(math.floor(location))] % 16)
+        curserLocation, screenLocation = _right(curserLocation, screenLocation)
+    elif ((location - math.floor(location)) == 0.5):
+        buffer[int(math.floor(location))] = (buffer[int(math.floor(location))] // 16) * 16 + number
+        curserLocation, screenLocation = _right(curserLocation, screenLocation)
+    else:
+        debug.debug("_write error")
+        
 if __name__ == "__main__":
     debug = Debug(True)
     print("Starting Py3HexEditLite.py")
@@ -422,4 +435,5 @@ if __name__ == "__main__":
         #    mode = "Input"
         elif (len(raw) == 1):
             if (chr(ord(raw)) in "1234567890abcdefABCDEF"):
+                _write(curserLocation, raw)
                 debug.debug("raw 1", raw)
