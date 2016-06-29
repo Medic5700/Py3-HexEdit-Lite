@@ -290,7 +290,7 @@ def _interface(data, curserLocation, screenLocation):
             elif (len(data) <= i*16+j):
                 temp += "_"
             else:
-                temp += hex(data[i*16+j] // 16)[2:]
+                temp += hex(data[i*16+j] // 16)[2:].upper()
             
             if (curserLocation == i*16+j+0.5): #small 4 bits
                 temp += "-"
