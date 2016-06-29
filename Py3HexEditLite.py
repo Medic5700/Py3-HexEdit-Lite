@@ -222,13 +222,13 @@ class Buffer:
 def _interface(data, curserLocation, screenLocation):
     """Prints file name, size of file, buffer status, and the hex editing interface"""
     #test interface
-    text = "Py3HexEditLite " + version.ljust(8, " ") + "File:" + filePath.ljust(52," ") + "\n"
+    text = "Py3HexEditLite " + version.ljust(8, " ") + "File:" + filePath[-52:].ljust(52," ") + "\n"
     text += "Size: " + "{0:7.2f}".format(fileSize / int(1024 ** math.floor(math.log(fileSize,1024)))) + " " 
     try: #Just in case 2**10 years in the future, someone decides to open the entirety of the internet worth of a file in this hex editor...
         text += " KMGTPEZY"[int(math.floor(math.log(fileSize,1024)))] + "B"
     except IndexError:
         text += "?B"
-    text += " Buffer:XXX%|XXX%  Location:" + ("0x" + hex(math.floor(curserLocation))[2:].upper()).rjust(18, " ")
+    text += " Buffer:XXX%|XXX% Location:" + ("0x" + hex(math.floor(curserLocation))[2:].upper()).rjust(18, " ")
     text += "/" + ("0x" + hex(fileSize)[2:].upper()).rjust(18, " ") + "\n"
     for i in range(screenLocation//16,screenLocation//16 + 16): #TODO: this is a shortcut, fix it
         temp = hex(i*16)[2:].zfill(12) + "|"
