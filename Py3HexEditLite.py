@@ -399,6 +399,7 @@ def quit():
     global debug
     buffer.close()
     del(debug)
+    exit(1)
     
 def goto(x):
     pass
@@ -491,6 +492,6 @@ if __name__ == "__main__":
                 debug.debug("raw 1", raw)
         elif (raw == "CTRL+S"):
             save()
-        elif (raw == "CTRL+D"): #TODO: this is only temperary
-            exit()        
-                
+        elif (raw == "CTRL+A"): #TODO: this is only temperary
+            print("QUITTING")
+            quit()
