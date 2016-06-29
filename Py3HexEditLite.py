@@ -334,6 +334,26 @@ def _right():
         y = screenLocation
     curserLocation = curserLocation + 0.5
     screenLocation = y
+    
+def _write(location, byte):
+    global curserLocation
+    global screenLocation
+    #debug.debug("_write", location, byte)
+    
+    if (byte == None):
+        buffer[int(math.floor(location))] = None
+    elif ((location - math.floor(location)) == 0):
+        number = int(byte,16)
+        if (buffer[int(math.floor(location))] == None):
+            buffer[int(math.floor(location))] = 0
+        buffer[int(math.floor(location))] = number * 16 + (buffer[int(math.floor(location))] % 16)
+        _right()
+    elif ((location - math.floor(location)) == 0.5):
+        number = int(byte,16)
+        if (buffer[int(math.floor(location))] == None):
+            buffer[int(math.floor(location))] = 0        
+        buffer[int(math.floor(location))] = (buffer[int(math.floor(location))] // 16) * 16 + number
+        _right()
 
 # API, accessable by user in 'Input' mode
 def save():
@@ -359,21 +379,7 @@ def goto(x):
     pass
 def find(x):
     pass
-def _write(location, byte):
-    global curserLocation
-    global screenLocation
-    #debug.debug("_write", location, byte)
-    
-    if (byte == None):
-        buffer[int(math.floor(location))] = None
-    elif ((location - math.floor(location)) == 0):
-        number = int(byte,16)
-        buffer[int(math.floor(location))] = number * 16 + (buffer[int(math.floor(location))] % 16)
-        _right()
-    elif ((location - math.floor(location)) == 0.5):
-        number = int(byte,16)
-        buffer[int(math.floor(location))] = (buffer[int(math.floor(location))] // 16) * 16 + number
-        _right()
+
 
 if __name__ == "__main__":
     debug = Debug(True)
