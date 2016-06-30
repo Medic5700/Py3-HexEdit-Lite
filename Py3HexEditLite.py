@@ -472,7 +472,7 @@ if __name__ == "__main__":
     while (buffer == None):
         filePath = input("Enter a file path:")
         print("Attempting to open file: " + filePath)
-        openFile(sys.argv[1])
+        openFile(filePath)
         '''
         try:
             openfile(filePath)
