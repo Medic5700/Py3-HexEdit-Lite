@@ -374,7 +374,9 @@ def _write(location, byte):
 # API, accessable by user in 'Input' mode
 def save():
     global buffer
+    global fileSize
     buffer.save()
+    fileSize = os.path.getsize(filePath)
     
     pass
 
