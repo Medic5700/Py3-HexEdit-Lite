@@ -378,19 +378,32 @@ def save():
     
     pass
 
-def openfile(filePath):
+def openFile(filePath):
     global buffer
+    global fileSize
     if (os.path.exists(filePath) == False):
-        return "ERROR: filepath does not exist" #TODO: raise an error
+        #raise FileNotFoundError
+        print("ERROR: File Not Found")
+        return -1
     if (os.path.isfile(filePath) == False):
-        return "ERROR: filepath is not a file" #TODO: raise an error
-    else:
-        try:
-            buffer = Buffer(filePath)
-        except:
-            buffer = None
-            return "ERROR: could not open file: " + filePath
-    return "Successfully opened file: " + filePath
+        #raise IsADirectoryError
+        print("ERROR: Path Not File")
+        return -1
+    
+    try:
+        buffer = Buffer(filePath)
+        fileSize = os.path.getsize(filePath)
+    except PermissionError:
+        print("ERROR: permission denied")
+        return -1
+    except Exception as i:
+        buffer = None
+        print("ERROR: could not open file: " + str(i))
+        return -1
+    
+    print("Successfully opened file: " + filePath)
+    return 0
+
 def new(filePath):
     pass
 
@@ -444,21 +457,34 @@ if __name__ == "__main__":
     filePath = None
     
     if (len(sys.argv) >= 2):
+        openFile(sys.argv[1])
+        '''
         try:
-            buffer = Buffer(sys.argv[1])
-            filePath = sys.argv[1]
+            #buffer = Buffer(sys.argv[1])
+            #filePath = sys.argv[1]
+            openfile(sys.argv[1])
         except:
             print("Could not open file at " + str(sys.argv[1]))
+        '''
     else:
         print("program has not been passed an argument")
         
     while (buffer == None):
         filePath = input("Enter a file path:")
-        print(openfile(filePath))
-        
-    fileSize = os.path.getsize(filePath)
-
-    #_write(curserLocation, None)
+        print("Attempting to open file: " + filePath)
+        openFile(sys.argv[1])
+        '''
+        try:
+            openfile(filePath)
+        except FileNotFoundError:
+            print("ERROR: File Not Found")
+        except IsADirectoryError:
+            print("ERROR: Path Is Directory")
+        except PermissionError:
+            print("ERROR: Permission Denied")
+        except:
+            print("ERROR: could not open file")
+        '''
     
     #Keyboard input
     keyboard = Keyboard()
