@@ -125,7 +125,7 @@ class Buffer:
         self.maxBlocks = 8 #4 #maximum number of blocks to hold in memory
         
         self._cacheMiss(0x00) #load initial block
-        debug.debug("buffer Blocks", self.blocks)
+        #debug.debug("buffer Blocks", self.blocks)
         
     def __delitem__(self,key):
         # https://docs.python.org/3/reference/datamodel.html#object.__delitem__
@@ -240,10 +240,10 @@ class Buffer:
             self.file.seek(i[0])
             if (i[1] == None):
                 self.file.write((0).to_bytes(1, sys.byteorder))
-                print("writing: " + str((0).to_bytes(1, sys.byteorder)))
+                #print("writing: " + str((0).to_bytes(1, sys.byteorder))) #debug
             else:
                 self.file.write((i[1]).to_bytes(1, sys.byteorder))
-                print("writing: " + str((i[1]).to_bytes(1, sys.byteorder)))
+                #print("writing: " + str((i[1]).to_bytes(1, sys.byteorder))) #debug
         self.file.flush()
         del(self.actionQueue[:])
         del(self.redoStack[:])
@@ -423,7 +423,7 @@ def find(x):
     pass
 
 if __name__ == "__main__":
-    debug = Debug(True)
+    debug = Debug(False)
     print("Starting Py3HexEditLite.py")
     debug.debug("Starting Py3HexEditLite.py===================================")
     '''
