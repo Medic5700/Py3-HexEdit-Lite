@@ -407,7 +407,6 @@ def goto(x):
 def find(x):
     pass
 
-
 if __name__ == "__main__":
     debug = Debug(True)
     print("Starting Py3HexEditLite.py")
@@ -447,17 +446,16 @@ if __name__ == "__main__":
     if (len(sys.argv) >= 2):
         try:
             buffer = Buffer(sys.argv[1])
+            filePath = sys.argv[1]
         except:
             print("Could not open file at " + str(sys.argv[1]))
-
-    print("program has not been passed an argument")
+    else:
+        print("program has not been passed an argument")
+        
     while (buffer == None):
         filePath = input("Enter a file path:")
         print(openfile(filePath))
         
-    #print("Attempting to Open file: " + filePath)
-    #buffer = Buffer(filePath)
-    
     fileSize = os.path.getsize(filePath)
 
     #_write(curserLocation, None)
