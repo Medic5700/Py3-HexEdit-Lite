@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 '''A program to help test the various modules of Py3HexEditLite.py, in addition to help develop it'''
+import sys
 
 env = None
 try:
     import tty #linux specific operations
-    import sys
     import termios #linux specific operations
     env = "UNIX"
 except:
@@ -49,3 +49,9 @@ if __name__ == "__main__":
             print("aborting unit tests")
             exit()
         
+        #create test file
+        fd = open("test.tmp","wb")
+        for i in range(0,256):
+            for j in range(0,256):
+                fd.write(j.to_bytes(1, sys.byteorder))
+        fd.close()
