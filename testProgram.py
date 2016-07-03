@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 '''A program to help test the various modules of Py3HexEditLite.py, in addition to help develop it'''
 import sys
+import unittest
 
 env = None
 try:
@@ -27,6 +28,28 @@ def getch():
         #finally
         termios.tcsetattr(terminalFD, termios.TCSADRAIN, oldSetting)
         return ch
+
+class BufferTest(unittest.TestCase):
+    # https://docs.python.org/3.5/library/unittest.html#module-unittest
+    pass
+    '''
+    def setUp(self):
+        self.buf = py3.Buffer("test.tmp")
+        
+    def testRead(self):
+        temp = []
+        for i in range(0,256):
+            for j in range(0,256):
+                temp.append(j)
+        self.assertListEqual(self.buf[0:256*256], temp)
+        self.assertEqual(len(self.buf), 256*256)
+        
+    def testSanity(self):
+        self.assertListEqual(self.buf[0:5], [0,1,2,3,4])
+        
+    def tearDown(self):
+        self.buf.close()
+        '''
 
 if __name__ == "__main__":
     #To help figure out the keymappings to Windows and Linux
@@ -55,3 +78,6 @@ if __name__ == "__main__":
             for j in range(0,256):
                 fd.write(j.to_bytes(1, sys.byteorder))
         fd.close()
+
+        #Unit Tests
+        unittest.main()
