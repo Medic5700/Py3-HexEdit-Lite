@@ -426,29 +426,7 @@ if __name__ == "__main__":
     debug = Debug(False)
     print("Starting Py3HexEditLite.py")
     debug.debug("Starting Py3HexEditLite.py===================================")
-    '''
-    #Buffer tests
-    buffer = Buffer("ReadMe.txt")
-    debug.debug("buffer length:", len(buffer))
-    debug.debug("buffer[0:188]:", buffer[0:188])
-    debug.debug("buffer[180:200]:", buffer[180:200])
-    debug.debug("buffer[180]:", buffer[180])
-    debug.debug("buffer[0]:", buffer[0])
-    debug.debug("buffer[200]:", buffer[200])
-    buffer[200] = 10
-    debug.debug("write buffer[200]:", buffer[200])
-    debug.debug("buffer[199:202]:", buffer[199:202])
-    debug.debug("len(buffer)", len(buffer))
-    buffer[0] = 255
-    debug.debug("buffer[0]:", buffer[0])
-    debug.debug("buffer[0:20]:", buffer[0:20])
-    for i in range(0,20):
-        buffer[i] = i
-    debug.debug("buffer[0:20]:", buffer[0:20])
-    del(buffer[0])
-    debug.debug("buffer[0:20]:", buffer[0:20])
-    buffer.close()
-    '''
+
     print("Py3HexEditLite " + version + " has started")
     
     curserLocation = 0.0 #A real, since in hex, a byte is represented as 2 hex chars

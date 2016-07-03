@@ -48,26 +48,35 @@ class BufferTest(unittest.TestCase):
         for i in range(0,256):
             for j in range(0,256):
                 temp.append(j)
-        self.assertListEqual(self.buf[0:256*256], temp)
+        self.assertEqual(self.buf[0:256*256], temp)
         self.assertEqual(len(self.buf), 256*256)
-        self.assertEqual(255, self.buf[256*256-1]) #remember, indexes are zero indexed
-        self.assertEqual(None, self.buf[256*256])
+        self.assertEqual(self.buf[256*256-1], 255) #remember, indexes are zero indexed
+        self.assertEqual(self.buf[256*256], None)        
         
     def testReadWrite(self):
         self.buf[0] = 255
-        self.assertEqual(255, self.buf[0])
+        self.assertEqual(self.buf[0], 255)
         self.buf[0] = None
-        self.assertEqual(None, self.buf[0])
-        self.assertListEqual([None, 1], self.buf[0:2])
+        self.assertEqual(self.buf[0], None)
+        self.assertEqual(self.buf[0:2], [None, 1])
         for i in range(0,256):
             self.buf[i] = None
-        self.assertListEqual([None for i in range(0, 256)], self.buf[0:256])
+        self.assertEqual(self.buf[0:256], [None for i in range(0, 256)])
         for i in range(0,256):
             self.buf[i] = 255
-        self.assertListEqual([255 for i in range(0, 256)], self.buf[0:256])
+        self.assertEqual(self.buf[0:256], [255 for i in range(0, 256)])
         
     def testReadSlice(self):
-        pass
+        temp = []
+        for i in range(0,256):
+            for j in range(0,256):
+                temp.append(j)
+        self.assertEqual(self.buf[0:256*256], temp)
+        self.assertEqual(self.buf[0:], temp)
+        self.assertEqual(self.buf[:256*256], temp)
+        self.assertEqual(self.buf[:], temp)
+        
+        
         
     def testLen(self):
         self.assertEqual(len(self.buf), 256*256)
@@ -79,7 +88,7 @@ class BufferTest(unittest.TestCase):
         self.assertEqual(len(self.buf), 256*256+256-1)
         
     def testBlockEviction(self):
-        pass
+        self.asserEqual(len(self.buf.blocks), 0)
     
     def testRaisedError(self):
         with self.assertRaises(ValueError):
