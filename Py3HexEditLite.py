@@ -1,8 +1,9 @@
+#!/usr/bin/env python3
 import math
 import os
 import sys
 
-version = "v0.2"
+version = "v0.3"
 
 class Debug:
     """Class for logging and debuging"""
@@ -141,15 +142,15 @@ class Buffer:
         self._cacheMiss(0x00) #load initial block
         #debug.debug("buffer Blocks", self.blocks)
         
-    def __delitem__(self,key):
+    def __delitem__(self,index):
         # https://docs.python.org/3/reference/datamodel.html#object.__delitem__
-        self.actionQueue.append((key, None))
+        self.actionQueue.append((index, None))
         
     def __getitem__(self,key):
-        """returns array of ints (NOT BYTES)
+        """returns array of ints and Nones (NOT BYTES)
         
         will return array of ints, or None in cases where the byte has been deleted
-        DO NOT itterate over with a for loop, IndexError will not be raised
+        DO NOT itterate over directly with a 'for' loop, IndexError will not be raised, thus the for loop will NOT terminate
         """
         # https://docs.python.org/3/reference/datamodel.html#object.__getitem__
         if (isinstance(key, slice)):
@@ -182,15 +183,15 @@ class Buffer:
     def __len__(self):
         """Returns length equal to the last last byte available/altered"""
         # https://docs.python.org/3/reference/datamodel.html#object.__len__
-        temp = self.os.path.getsize(self.filePath)
+        length = self.os.path.getsize(self.filePath)
         for i in self.actionQueue:
-            if (i[0] > temp):
-                temp = i[0]
-        return temp
+            if (i[0] > length):
+                length = i[0]
+        return length
     
-    def __setitem__(self,key,value):
+    def __setitem__(self,index,value):
         # https://docs.python.org/3/reference/datamodel.html#object.__setitem__
-        self.actionQueue.append((key,value))
+        self.actionQueue.append((index,value))
     
     def _inCache(self,offset):
         if ((offset // self.blockSize) * self.blockSize in self.blocks.keys()):
@@ -236,8 +237,9 @@ class Buffer:
     def status(self):
         """returns float representing how 'full' the buffer is as percentage"""
         pass
-    def flag(self, start, finish):
+    def mask(self, key):
         """Returns array of bool signifying which bytes have been changed"""
+        #key can be an int, or a slice
         pass
     
     def close(self):
@@ -247,7 +249,7 @@ class Buffer:
         del(self.blocks)
         self.file.close()
         
-    def save(self):
+    def flush(self):
         """Writes the actions to file"""
         #TODO: if editied file is smaller then original, create a copy to resize
         for i in self.actionQueue:
@@ -389,9 +391,11 @@ def _write(location, byte):
 def save():
     global buffer
     global fileSize
-    buffer.save()
+    buffer.flush()
     fileSize = os.path.getsize(filePath)
     
+def saveAs():
+    global buffer
     pass
 
 def openFile(filePath):
@@ -421,6 +425,7 @@ def openFile(filePath):
     return 0
 
 def new(filePath):
+    global buffer
     pass
 
 def quit():
@@ -435,6 +440,9 @@ def goto(x):
     pass
 
 def find(x):
+    global buffer
+    pass
+def trunk(x):
     pass
 
 if __name__ == "__main__":
