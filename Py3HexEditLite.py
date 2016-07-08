@@ -496,20 +496,21 @@ if __name__ == "__main__":
             _left()
         elif (raw == "RIGHT"):
             _right()
-        elif (chr(ord(raw)) == "\t"):
-            if (mode == "Hex"):
-                mode = "Text"
-            elif (mode == "Text"):
-                mode = "Hex"
         elif (raw == "CTRL+E"): #TODO: implement command input
             pass
         elif (raw == "DEL"):
             _write(curserLocation, None)
+        elif (raw == "CTRL+S"):
+            save()
+        elif (raw == "CTRL+Q"): #TODO: this is only temperary
+                quit()        
         elif (len(raw) == 1):
             if (mode == "Hex") and ((chr(ord(raw)) in "1234567890abcdefABCDEF")):
                 _write(curserLocation, raw)
                 debug.debug("raw 1", raw)
-        elif (raw == "CTRL+S"):
-            save()
-        elif (raw == "CTRL+Q"): #TODO: this is only temperary
-            quit()
+            elif (chr(ord(raw)) == "\t"):
+                if (mode == "Hex"):
+                    mode = "Text"
+                elif (mode == "Text"):
+                    mode = "Hex"            
+
