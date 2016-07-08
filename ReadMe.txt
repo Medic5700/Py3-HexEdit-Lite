@@ -6,10 +6,10 @@ Status: Currently a usable prototype (IE: Alpha)
 Running:
     Run Py3HexEditLite.py with Python3 #you can give a file name for an arg to open
     You can also enter a filename when you open it if no args were given
-    Note: CTRL+C will not exit, use CTRL+A (a temporary placeholder)
+    Note: CTRL+C will not exit, use CTRL+Q
 Controls:
     Arrow keys   - move curser
-    CTRL+A       - quit program (a temperary placeholder binding)
+    CTRL+Q       - quit program
     CTRL+S       - save
     DEL          - deletes a byte
     A hex number - write a byte at curser location

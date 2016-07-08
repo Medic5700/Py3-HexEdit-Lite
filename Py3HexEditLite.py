@@ -47,7 +47,7 @@ class Keyboard:
     """A small class for handling AND parsing single character keyboard input"""
     env = None #The detected environment, either "W" for windows, or "L" for linux
     
-    #This detects what input method would would (windows of linux) based on what imports work/fail
+    #This detects what input method would would work (windows of linux) based on what imports work/fail
     try:
         #Windows
         import msvcrt #windows specific operations
@@ -61,20 +61,29 @@ class Keyboard:
     
     def __init__(self):
         #self.regularKeys = ""
-        self.escape = {"L":0x1B,"W":0xE0}
+        self.escape = {"L":[0x1B], "W":[0xE0, 0x00]}
         #this looks backwards, but is meant to make it easy to edit these character bindings
         self.specialKeys = {"CTRL+A"  :{"L":0x01      ,"W":0x01      },
+                            "CTRL+C"  :{"L":0x03      ,"W":0x03      },
+                            "CTRL+D"  :{"L":None,"W":0x04},
                             "CTRL+E"  :{"L":0x05      ,"W":0x05      },
+                            "CTRL+F"  :{"L":None,"W":0x06},
+                            #"CTRL+M"  :{"L":0x0D      ,"W":0x0D      }, #This is the same as ENTER !?
                             "CTRL+Q"  :{"L":0x11      ,"W":0x11      },
                             "CTRL+S"  :{"L":0x13      ,"W":0x13      },
+                            "CTRL+W"  :{"L":None,"W":0x17},
+                            "CTRL+X"  :{"L":0x18      ,"W":0x18      },
                             "CTRL+Y"  :{"L":0x19      ,"W":0x19      },
                             "CTRL+Z"  :{"L":0x1A      ,"W":0x1A      },
+                            #"ENTER"   :{"L":0x0D      ,"W":0x0D      }, #This is the same as CTRL+M !?
                             "UP"      :{"L":0x1B5B41  ,"W":0xE048    },
                             "DOWN"    :{"L":0x1B5B42  ,"W":0xE050    },
                             "LEFT"    :{"L":0x1B5B44  ,"W":0xE04B    },
                             "RIGHT"   :{"L":0x1B5B43  ,"W":0xE04D    },
                             #"ESC"     :{"L":0x1B      ,"W":0x1B      } #problimatic since 0x1B is the linux escape character (I think?)
-                            "DEL"     :{"L":0x1B5B33  ,"W":0xE053    } #"L" should be 0x1B5B337E, but I'll ignore the 4th chr for simplicity
+                            "DEL"     :{"L":0x1B5B33  ,"W":0xE053    }, #"L" 0x1B5B337E
+                            "PAGEUP"  :{"L":0x1B5B35  ,"W":0xE049    }, #"L" 0x1B5B357E
+                            "PAGEDOWN":{"L":0x1B5B36  ,"W":0xE051    }  #"L" 0x1B5B367E
                             }
 
     def _getch(self):
@@ -98,17 +107,22 @@ class Keyboard:
         """parses keyboard input, returns str representing keypress (IE: 'a', '1', 'Ctrl+Z')"""
         raw = self._getch()
         output = None
-        if (ord(raw) == self.escape[self.env]):
+        if (ord(raw) in self.escape[self.env]):
+            temp = ""
             if (self.env == "W"):
                 temp = ord(raw) * 256 + ord(self._getch())
             if (self.env == "L"):
                 temp = ord(raw) * 256**2 + ord(self._getch()) * 256 + ord(self._getch())
             for i in self.specialKeys.keys():
                 if (self.specialKeys[i][self.env] == temp):
+                    if (self.env == "L") and (i in ["DEL","PAGEUP","PAGEDOWN"]): #TODO: figure out better way to figure out which keys need to get that special character
+                        self._getch()
                     return i
         else:
             for i in self.specialKeys.keys():
                 if (self.specialKeys[i][self.env] == ord(raw)):
+                    if (self.env == "L") and (i in ["DEL","PAGEUP","PAGEDOWN"]): #TODO: figure out better way to figure out which keys need to get that special character
+                        self._getch()
                     return i
         return raw
 
@@ -412,9 +426,10 @@ def new(filePath):
 def quit():
     global buffer
     global debug
+    print("Py3HexEditLite.py is quiting")
     buffer.close()
     del(debug)
-    exit(1)
+    exit(0)
     
 def goto(x):
     pass
@@ -481,21 +496,20 @@ if __name__ == "__main__":
             _left()
         elif (raw == "RIGHT"):
             _right()
-        elif (raw == "CTRL+Q"):
+        elif (chr(ord(raw)) == "\t"):
             if (mode == "Hex"):
                 mode = "Text"
             elif (mode == "Text"):
                 mode = "Hex"
-        #elif (raw == "CTRL+E"): #TODO
-        #    mode = "Input"
+        elif (raw == "CTRL+E"): #TODO: implement command input
+            pass
         elif (raw == "DEL"):
             _write(curserLocation, None)
         elif (len(raw) == 1):
-            if (chr(ord(raw)) in "1234567890abcdefABCDEF"):
+            if (mode == "Hex") and ((chr(ord(raw)) in "1234567890abcdefABCDEF")):
                 _write(curserLocation, raw)
                 debug.debug("raw 1", raw)
         elif (raw == "CTRL+S"):
             save()
-        elif (raw == "CTRL+A"): #TODO: this is only temperary
-            print("QUITTING")
+        elif (raw == "CTRL+Q"): #TODO: this is only temperary
             quit()
