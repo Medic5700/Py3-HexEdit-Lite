@@ -133,6 +133,7 @@ class Buffer:
     def __init__(self, filePath):
         self.filePath = filePath
         self.file = open(filePath, 'r+b') #does not handle exceptopns here, so calling function can handle raised exceptions
+        self.fileSize = self.file.seek(0,2)
         self.blocks = {} #contains block of data stored as {Offset:[array of int 0<=x<=255, or None]}
         self.blockSize = 16 #1024*4
         self.actionQueue = [] #contains actions as an ordered list of tuples (offset, data)
@@ -205,9 +206,9 @@ class Buffer:
         closestBlock = (offset // self.blockSize) * self.blockSize
         if (len(self.blocks) >= self.maxBlocks):
             self._cacheEvict(closestBlock)
-        fileSize = self.os.path.getsize(self.filePath)
+        #fileSize = self.os.path.getsize(self.filePath)
         block = []
-        if (closestBlock > fileSize):
+        if (closestBlock > self.fileSize):
             block = [None for i in range(0, self.blockSize)]
         else:
             self.file.seek(closestBlock)
@@ -423,7 +424,7 @@ def openFile(path):
     try:
         buffer = Buffer(path)
         #fileSize = os.path.getsize(path) #returns incorrect value when opening a drive (as a block device)
-        fileSize = buffer.seek(0,2)
+        fileSize = buffer.fileSize
         filePath = path
         print("Successfully opened file: " + path)
     except PermissionError:
