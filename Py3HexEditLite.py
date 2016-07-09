@@ -13,17 +13,19 @@ class Debug:
         
     def __save(self, text):
         """Function to save each log entry"""
-        logfile = open(self.__filename, 'a')
-        try:
-            logfile.write(text)
-        except:
-            self.err("Error Occured in Error Logging Function: Attempting to report previous error")
-            for i in text:
-                try:
-                    logfile.write(i)
-                except:
-                    logfile.write("[ERROR]")
-        logfile.close()
+        if (self.showDebug == True):
+            logfile = open(self.__filename, 'a')
+            try:
+                logfile.write(text)
+            except:
+                self.err("Error Occured in Error Logging Function: Attempting to report previous error")
+                for i in text:
+                    try:
+                        logfile.write(i)
+                    except:
+                        logfile.write("[ERROR]")
+            finally:
+                logfile.close()
     
     def err(self, text):
         """Takes string, pushes to stdout and saves it to the log file
