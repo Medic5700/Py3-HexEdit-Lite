@@ -398,21 +398,34 @@ def saveAs():
     global buffer
     pass
 
-def openFile(filePath):
+def openFile(path):
+    # https://docs.python.org/3/library/os.path.html#os.path.isfile
     global buffer
     global fileSize
-    if (os.path.exists(filePath) == False):
+    global filePath
+    
+    # TODO: fix and properly test this to enable use for block editing raw drive blocks, and other stuff?
+    if (os.path.exists(path) == False):
         #raise FileNotFoundError
         print("ERROR: File Not Found")
         return -1
-    if (os.path.isfile(filePath) == False):
-        #raise IsADirectoryError
-        print("ERROR: Path Not File")
-        return -1
+    if (os.path.isdir(path) == True):
+        print("Attempting to open a directory")
+    if (os.path.islink(path) == True):
+        print("Attemtping to open a sumbolic link")
+    if (os.path.ismount(path) == True):
+        print("Attempting to open a mount point")
+    #if (os.path.isfile(path) == False): #this does not allow opening a drive (as a block device)
+    #    #raise IsADirectoryError
+    #    print("ERROR: Path Not File")
+    #    return -1
     
     try:
-        buffer = Buffer(filePath)
-        fileSize = os.path.getsize(filePath)
+        buffer = Buffer(path)
+        #fileSize = os.path.getsize(path) #returns incorrect value when opening a drive (as a block device)
+        fileSize = buffer.seek(0,2)
+        filePath = path
+        print("Successfully opened file: " + path)
     except PermissionError:
         print("ERROR: permission denied")
         return -1
@@ -421,7 +434,7 @@ def openFile(filePath):
         print("ERROR: could not open file: " + str(i))
         return -1
     
-    print("Successfully opened file: " + filePath)
+    
     return 0
 
 def new(filePath):
@@ -446,7 +459,7 @@ def trunk(x):
     pass
 
 if __name__ == "__main__":
-    debug = Debug(False)
+    debug = Debug(True)
     print("Starting Py3HexEditLite.py")
     debug.debug("Starting Py3HexEditLite.py===================================")
 
@@ -458,8 +471,11 @@ if __name__ == "__main__":
     commandMessage = ""
     buffer = None
     filePath = None
+    fileSize = None
     
     if (len(sys.argv) >= 2):
+        #filePath = sys.argv[1]
+        #openFile(filePath)
         openFile(sys.argv[1])
         '''
         try:
