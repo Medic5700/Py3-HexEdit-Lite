@@ -269,6 +269,97 @@ class Buffer:
         for i in list(self.blocks.keys()):
             del(self.blocks[i])
 
+class window:   
+    def interface():
+        """Prints the interface window"""
+        text = ""
+        text += window._header()
+        text += window._body()
+        text += window._footer()
+        print(text)
+    
+    def _header():
+        """Returns String representing the first 4 lines of interface window, newline terminated"""
+        global filePath
+        global fileSize
+        global mode
+        
+        text = ""
+        text = "Py3HexEditLite " + version.ljust(8, " ") + "File:" + filePath[-52:].ljust(52," ") + "\n"
+        text += "Size: " + "{0:7.2f}".format(fileSize / int(1024 ** math.floor(math.log(fileSize, 1024)))) + " " 
+        try: #Just in case 2**10 years in the future, someone decides to open the entirety of the internet worth of a file in this hex editor...
+            text += " KMGTPEZY"[int(math.floor(math.log(fileSize, 1024)))] + "B"
+        except IndexError:
+            text += "?B"
+        text += " Buffer:XXX%|XXX% Location:" + ("0x" + hex(math.floor(curserLocation))[2:].upper()).rjust(18, " ")
+        text += "/" + ("0x" + hex(fileSize)[2:].upper()).rjust(18, " ")     
+        return text + "\n"
+    
+    def _body():
+        """Returns String representing 16 lines where you can edit stuff, newline terminated"""
+        global screenLocation
+        global curserLocation 
+        global buffer
+        
+        text = ""
+        line = ""
+        #debug.debug("_body", curserLocation, screenLocation)
+        for i in range(screenLocation // 16, screenLocation // 16 + 16):
+            line = hex(i * 16)[2:].upper().zfill(12) + "|"
+            for j in range(0, 16):
+                if (j == 8):
+                    line += "|"
+                
+                line += " "
+                if (curserLocation == i * 16 + j): #large 4 bits
+                    line += "-"
+                elif (buffer[i * 16 + j] == None):
+                    line += "_"
+                else:
+                    line += hex(buffer[i * 16 + j] // 16)[2:].upper()
+                
+                if (curserLocation == i * 16 + j + 0.5): #small 4 bits
+                    line += "-"
+                elif (buffer[i * 16 + j] == None):
+                    line += "_"
+                else:
+                    line += hex(buffer[i * 16 + j] % 16)[2:].upper()
+            '''
+            line += "|"
+            for j in range(8, 16):
+                line += " "
+                if (curserLocation == i * 16 + j): #large 4 bits
+                    line += "-"
+                elif (buffer[i * 16 + j] == None):
+                    line += "_"
+                else:
+                    line += hex(buffer[i * 16 + j] // 16)[2:].upper()
+                
+                if (curserLocation == i * 16 + j + 0.5): #small 4 bits
+                    line += "-"
+                elif (buffer[i * 16 + j] == None):
+                    line += "_"
+                else:
+                    line += hex(buffer[i * 16 + j] % 16)[2:].upper()
+            '''
+            line += "| "
+            for j in range(0, 16):
+                if (buffer[i * 16 + j] == None):
+                    line += " "
+                elif chr(buffer[i * 16 + j]).isprintable():
+                    line += chr(buffer[i * 16 + j])
+                else:
+                    line += "."
+            
+            text += line + "\n"
+        return text
+    
+    def _footer():
+        """Returns String 4 lines max with any additional information needed, newline terminated"""
+        global mode
+        return "[" + mode + "]"
+    
+'''
 def _interface(data, curserLocation, screenLocation):
     """Prints file name, size of file, buffer status, and the hex editing interface"""
     #test interface
@@ -324,6 +415,7 @@ def _interface(data, curserLocation, screenLocation):
         text += temp + "\n"
     text += "[" + mode+ "]"
     print(text)
+'''
 
 def _up():
     """Move curser up, sets curserLocation, adjusts screenLocation as needed"""
@@ -511,7 +603,8 @@ if __name__ == "__main__":
     #Keyboard input
     keyboard = Keyboard()
     while (True):
-        _interface(buffer, curserLocation, screenLocation)
+        window.interface()
+        #_interface(buffer, curserLocation, screenLocation)
         
         raw = keyboard.getch()
         #debug.debug("variable \"raw\"",  type(raw), len(raw), str(raw))
