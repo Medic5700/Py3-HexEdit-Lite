@@ -553,6 +553,52 @@ def find(x):
 def trunk(x):
     pass
 
+#TODO: implement command input
+#An attempt to make a line interpriter for using commands
+# https://docs.python.org/3.5/library/cmd.html
+# https://docs.python.org/3.5/library/code.html
+import code
+def command():
+    """meant to help execute commands within the current python3 environement"""
+    # https://docs.python.org/3.5/library/code.html
+    # can't use sys.ps1 and sys.ps2 since it doesn't work on windows?
+    '''
+    temp = input(":")
+    debug.debug("command()", temp)
+    eval(temp)
+    exec(temp)
+    '''
+    debug.debug("command")
+    codeBlock = None
+    temp = ""
+    temp2 = ""
+    while codeBlock == None:
+        if temp == "":
+            temp2 = input(">>>")#sys.ps1
+        else:
+            temp2 = input("...")#sys.ps2
+            
+        if temp2 == "":
+            temp += "\n"
+            break
+        else:
+            temp += temp2
+            
+        try:
+            codeBlock = code.compile_command(temp)
+        except SyntaxError:
+            temp = ""
+            print("syntax error")
+        except (OverflowError, ValueError):
+            temp = ""
+            print("invalid literal")
+    debug.debug("command", temp, codeBlock)
+    codeBlock = code.compile_command(temp)
+    try:
+        exec(codeBlock)
+    except Exception as i:
+        debug.debug("command execution error", i)
+
 if __name__ == "__main__":
     debug = Debug(True)
     print("Starting Py3HexEditLite.py")
@@ -602,8 +648,9 @@ if __name__ == "__main__":
     
     #Keyboard input
     keyboard = Keyboard()
+    window.interface()
     while (True):
-        window.interface()
+        #window.interface()
         #_interface(buffer, curserLocation, screenLocation)
         
         raw = keyboard.getch()
@@ -616,8 +663,8 @@ if __name__ == "__main__":
             _left()
         elif (raw == "RIGHT"):
             _right()
-        elif (raw == "CTRL+E"): #TODO: implement command input
-            pass
+        elif (raw == "CTRL+E"):
+            command()
         elif (raw == "DEL"):
             _write(curserLocation, None)
         elif (raw == "CTRL+S"):
@@ -632,5 +679,6 @@ if __name__ == "__main__":
                 if (mode == "Hex"):
                     mode = "Text"
                 elif (mode == "Text"):
-                    mode = "Hex"            
-
+                    mode = "Hex"
+        
+        window.interface()
