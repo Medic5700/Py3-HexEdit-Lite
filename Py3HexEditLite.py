@@ -555,7 +555,8 @@ def goto(x):
     elif (x < 0):
         raise ValueError
     curserLocation = math.floor(x * 2) / 2
-    screenLocation = int(x // 16)
+    screenLocation = int(x // 16) * 16
+    debug.debug("goto", curserLocation, screenLocation)
 def find(x):
     global buffer
     pass
