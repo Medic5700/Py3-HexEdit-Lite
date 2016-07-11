@@ -328,14 +328,14 @@ class window:
             line += "|"
             for j in range(8, 16):
                 line += " "
-                if (curserLocation == i * 16 + j): #large 4 bits
+                if ((curserLocation == i * 16 + j) and (mode == "HEX")): #large 4 bits
                     line += "-"
                 elif (buffer[i * 16 + j] == None):
                     line += "_"
                 else:
                     line += hex(buffer[i * 16 + j] // 16)[2:].upper()
                 
-                if (curserLocation == i * 16 + j + 0.5): #small 4 bits
+                if ((curserLocation == i * 16 + j + 0.5) and (mode == "HEX")): #small 4 bits
                     line += "-"
                 elif (buffer[i * 16 + j] == None):
                     line += "_"
@@ -344,7 +344,9 @@ class window:
             '''
             line += "| "
             for j in range(0, 16):
-                if (buffer[i * 16 + j] == None):
+                if ((curserLocation == i * 16 + j) and (mode == "TEXT")):
+                    line += "-"
+                elif (buffer[i * 16 + j] == None):
                     line += " "
                 elif chr(buffer[i * 16 + j]).isprintable():
                     line += chr(buffer[i * 16 + j])
@@ -674,11 +676,17 @@ if __name__ == "__main__":
         elif (len(raw) == 1):
             if (mode == "Hex") and ((chr(ord(raw)) in "1234567890abcdefABCDEF")):
                 _write(curserLocation, raw)
-                debug.debug("raw 1", raw)
+                debug.debug("HEX raw", raw)
+            elif (mode == "TEXT") and ((chr(ord(raw))).isprintable()):
+                #_write(curserLocation, raw)
+                buffer[int(math.floor(curserLocation))] = ord(raw)
+                _right()
+                _right()
+                debug.debug("TEXT raw", raw)
             elif (chr(ord(raw)) == "\t"):
-                if (mode == "Hex"):
-                    mode = "Text"
-                elif (mode == "Text"):
-                    mode = "Hex"
+                if (mode == "HEX"):
+                    mode = "TEXT"
+                elif (mode == "TEXT"):
+                    mode = "HEX"
         
         window.interface()
