@@ -547,8 +547,15 @@ def quit():
     exit(0)
     
 def goto(x):
-    pass
-
+    """Moves curser to x, adjusts screenLocation accordingly"""
+    global curserLocation
+    global screenLocation
+    if (not ((type(x) == int) or (type(x) == float))):
+        raise TypeError
+    elif (x < 0):
+        raise ValueError
+    curserLocation = math.floor(x * 2) / 2
+    screenLocation = int(x // 16)
 def find(x):
     global buffer
     pass
