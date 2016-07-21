@@ -162,6 +162,7 @@ class Buffer:
         
         self._actionQueue = [] #contains actions as an ordered list of tuples (offset, data)
         self._redoStack = [] #contains actions as stack of tuples (offset, data)
+        self._undoSize = 16 #maximum number of undo actions allowed
         
     def __delitem__(self, index):
         # https://docs.python.org/3/reference/datamodel.html#object.__delitem__
@@ -187,33 +188,68 @@ class Buffer:
                     self._cacheMiss(i)
                 temp.append(self._readBuffer[(i // self._blockSize) * self._blockSize][i - (i // self._blockSize) * self._blockSize])
                 i += step
+
+            i = key.start
+            while (i < key.stop):
+                if (i // self._blockSize) * self._blockSize in self._writeBuffer.keys():
+                    if self._writeBuffer[(i // self._blockSize) * self._blockSize][i - (i // self._blockSize) * self._blockSize] != None:
+                        temp[i - key.start] = self._writeBuffer[(i // self._blockSize) * self._blockSize][i - (i // self._blockSize) * self._blockSize]
+                i += step
             
             for i in self._actionQueue:
                 if ((i[0] >= key.start) and (i[0] < key.stop) and (i[0] % step == key.start % step)):
                     temp[(i[0] - key.start) // step] = i[1]
             return temp
+        
         else: #it's a regular int
             if (self._inCache(key) == False):
                 self._cacheMiss(key)
             temp = self._readBuffer[(key // self._blockSize) * self._blockSize][key - (key // self._blockSize) * self._blockSize]
+            if (key // self._blockSize) * self._blockSize in self._writeBuffer.keys():
+                if self._writeBuffer[(key // self._blockSize) * self._blockSize][key - (key // self._blockSize) * self._blockSize] != None:
+                    temp = self._writeBuffer[(key // self._blockSize) * self._blockSize][key - (key // self._blockSize) * self._blockSize]
             for i in self._actionQueue:
                 if (i[0] == key):
                     temp = i[1]
+            #debug.debug("Buffer __Getitem__", key, temp)
             return temp
         
     def __len__(self):
         """Returns length equal to the last last byte available/altered"""
         # https://docs.python.org/3/reference/datamodel.html#object.__len__
-        #length = self.os.path.getsize(self.filePath)
+        #TODO: improve efficency
         length = self.fileSize
+        if len(self._writeBuffer) != 0:
+            temp = sorted(self._writeBuffer.keys())[-1]
+            for i in range(0, self._blockSize):
+                if self._writeBuffer[temp][i] != None:
+                    if temp + i + 1> length:
+                        length = temp + i + 1
+        
         for i in self._actionQueue:
-            if (i[0] > length):
-                length = i[0]
+            if (i[0] + 1 > length):
+                length = i[0] + 1
+        
         return length
     
     def __setitem__(self,index,value):
+        """Write value at index to buffer"""
         # https://docs.python.org/3/reference/datamodel.html#object.__setitem__
-        self._actionQueue.append((index, value))
+        if len(self._actionQueue) >= self._undoSize:
+            temp = self._actionQueue.pop(0)
+            self.__pushWrite(temp[0], temp[1])
+            self._actionQueue.append((index, value))
+        else:
+            self._actionQueue.append((index, value))
+        
+    def __pushWrite(self, index, value):
+        """Write value at index to _writeBuffer"""
+        #debug.debug("__pushWrite", index, value)
+        if ((index // self._blockSize) * self._blockSize in self._writeBuffer.keys()):
+            self._writeBuffer[(index // self._blockSize) * self._blockSize][index - ((index // self._blockSize) * self._blockSize)] = value
+        else:
+            self._writeBuffer[(index // self._blockSize) * self._blockSize] = [None for i in range(0, self._blockSize)]
+            self._writeBuffer[(index // self._blockSize) * self._blockSize][index - ((index // self._blockSize) * self._blockSize)] = value
     
     def _inCache(self, offset):
         if ((offset // self._blockSize) * self._blockSize in self._readBuffer.keys()):
@@ -273,29 +309,44 @@ class Buffer:
         del(self._actionQueue[:])
         del(self._redoStack[:])
         del(self._readBuffer)
+        del(self._writeBuffer)
         self.file.close()
         
     def flush(self):
         """Writes the actions to file"""
         #TODO: if editied file is smaller then original, create a copy to resize
-        for i in self._actionQueue:
+        for i in sorted(self._writeBuffer.keys()): #goes through _writeBuffer
+            for j in range(0, self._blockSize):
+                if self._writeBuffer[i][j] != None:
+                    self.file.seek(i + j)
+                    self.file.write(self._writeBuffer[i][j].to_bytes(1, sys.byteorder))
+        
+        for i in self._actionQueue: #goes through _actionQueue
             self.file.seek(i[0])
             if (i[1] == None):
                 self.file.write((0).to_bytes(1, sys.byteorder))
             else:
                 self.file.write((i[1]).to_bytes(1, sys.byteorder))
+                
         self.file.flush()
+        self.fileSize = self.file.seek(0,2) #resets fileSize
+        
         del(self._actionQueue[:])
         del(self._redoStack[:])
         for i in list(self._readBuffer.keys()):
             del(self._readBuffer[i])
+        for i in list(self._writeBuffer.keys()):
+            del(self._writeBuffer[i])        
             
     def refresh(self):
         """refreshes all buffers without writing/updating file"""
+        self.fileSize = self.file.seek(0,2) #resets fileSize
         del(self._actionQueue[:])
         del(self._redoStack[:])
         for i in list(self._readBuffer.keys()):
-            del(self._readBuffer[i])        
+            del(self._readBuffer[i])
+        for i in list(self._writeBuffer.keys()):
+            del(self._writeBuffer[i])
 
 class window:   
     def interface():
