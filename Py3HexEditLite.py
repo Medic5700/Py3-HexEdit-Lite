@@ -314,10 +314,17 @@ class Buffer:
         """returns string representing how 'full' the various buffers are"""
         pass
     
-    def mask(self, start, stop=None):
+    def mask(self, key):
         """Returns bool signifying which bytes have been changed when stop == None
         Returns array of bool when stop != None"""
-        pass
+        temp = False
+        if (key // self._blockSize) * self._blockSize in self._writeBuffer.keys():
+            if self._writeBuffer[(key // self._blockSize) * self._blockSize][key - (key // self._blockSize) * self._blockSize] != None:
+                temp = True
+        for i in self._actionQueue:
+            if (i[0] == key):
+                temp = True
+        return temp
     
     def close(self):
         #remember to delete all the buffers
@@ -404,7 +411,13 @@ class window:
                 if (j == 8):
                     line += "|"
                 
-                line += " "
+                #line += " "
+                if buffer.mask(i * 16 + j):
+                    line += "*"
+                else:
+                    line += " "
+                
+                
                 if ((curserLocation == i * 16 + j) and (mode == "HEX")): #large 4 bits
                     line += "-"
                 elif (buffer[i * 16 + j] == None):
