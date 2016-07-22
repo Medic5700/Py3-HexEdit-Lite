@@ -179,26 +179,34 @@ class Buffer:
         if (isinstance(key, slice)): #it's a slice
             #TODO: implement full functionality (raise errors, handle cases ([1:],[:1],[:],[-1:],etc)
             step = 1
+            start = 0
+            stop = self.__len__()
             if (key.step != None):
                 step = key.step
-            i = key.start
+            if (key.start != None):
+                start = key.start
+            if (key.stop != None):
+                stop = key.stop
+                
+            i = start
             temp = []
-            while (i < key.stop):
+            while (i < stop): #Goes through _readBuffer
                 if (self._inCache(i) == False):
                     self._cacheMiss(i)
                 temp.append(self._readBuffer[(i // self._blockSize) * self._blockSize][i - (i // self._blockSize) * self._blockSize])
                 i += step
 
-            i = key.start
-            while (i < key.stop):
+            i = start
+            while (i < stop): #Goes through _writeBuffer
                 if (i // self._blockSize) * self._blockSize in self._writeBuffer.keys():
                     if self._writeBuffer[(i // self._blockSize) * self._blockSize][i - (i // self._blockSize) * self._blockSize] != None:
-                        temp[i - key.start] = self._writeBuffer[(i // self._blockSize) * self._blockSize][i - (i // self._blockSize) * self._blockSize]
+                        temp[i - start] = self._writeBuffer[(i // self._blockSize) * self._blockSize][i - (i // self._blockSize) * self._blockSize]
                 i += step
             
-            for i in self._actionQueue:
-                if ((i[0] >= key.start) and (i[0] < key.stop) and (i[0] % step == key.start % step)):
-                    temp[(i[0] - key.start) // step] = i[1]
+            for i in self._actionQueue: #Goes through _actionQueue
+                if ((i[0] >= start) and (i[0] < stop) and (i[0] % step == start % step)):
+                    temp[(i[0] - start) // step] = i[1]
+                    
             return temp
         
         else: #it's a regular int
