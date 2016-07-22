@@ -716,9 +716,11 @@ if __name__ == "__main__":
             _right()
         elif (raw == "CTRL+E"):
             _command()
+        '''
         elif (raw == "DEL"):
             buffer[int(math.floor(curserLocation))] = None
             #_write(curserLocation, None)
+        '''
         elif (raw == "CTRL+S"):
             save()
         elif (raw == "CTRL+Q"):
