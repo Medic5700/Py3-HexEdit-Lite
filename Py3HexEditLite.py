@@ -210,6 +210,9 @@ class Buffer:
             return temp
         
         else: #it's a regular int
+            if not (isinstance(5, int)):
+                raise TypeError
+            
             if (self._inCache(key) == False):
                 self._cacheMiss(key)
             temp = self._readBuffer[(key // self._blockSize) * self._blockSize][key - (key // self._blockSize) * self._blockSize]
@@ -243,6 +246,10 @@ class Buffer:
     def __setitem__(self,index,value):
         """Write value at index to buffer"""
         # https://docs.python.org/3/reference/datamodel.html#object.__setitem__
+        if not (isinstance(index, int)):
+            raise TypeError
+        if (value < 0) or (value > 255):
+            raise ValueError
         if len(self._actionQueue) >= self._undoSize:
             temp = self._actionQueue.pop(0)
             self.__pushWrite(temp[0], temp[1])
