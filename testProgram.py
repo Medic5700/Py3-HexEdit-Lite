@@ -2,6 +2,7 @@
 '''A program to help test the various modules of Py3HexEditLite.py, in addition to help develop it'''
 import sys
 import unittest
+import tracemalloc # https://docs.python.org/3/library/tracemalloc.html
 
 env = None
 try:
@@ -47,32 +48,37 @@ class BufferTest(unittest.TestCase):
         """Tests that buffer gets the stats of the file correct"""
         self.assertEqual(self.buf.filePath, "temp.tmp")
         self.assertEqual(self.buf.fileSize, 256*256)
+        
+    def testFileReadWrite(self):
+        """Tests reading and writing to a file"""
+        pass
     
     def testSimpleRead(self):
         """Tests simple reads from buffer"""
-        temp = [j for i in range(0,256) for j in range(0,256)]
+        temp = [j for i in range(0, 256) for j in range(0, 256)]
         self.assertEqual(self.buf[0:256*256], temp)
-        self.assertEqual(len(self.buf), 256*256)
         self.assertEqual(self.buf[256*256-1], 255) #remember, indexes are zero indexed
-        self.assertEqual(self.buf[256*256], None)        
+        self.assertEqual(self.buf[256*256], None)
         
     def testReadWrite(self):
         """Tests reading and writing to/from buffer"""
         self.buf[0] = 255
         self.assertEqual(self.buf[0], 255)
+        ''' #testing ability to store deleted characters, will have to replan how to handle them
         self.buf[0] = None
         self.assertEqual(self.buf[0], None)
         self.assertEqual(self.buf[0:2], [None, 1])
         for i in range(0,256):
             self.buf[i] = None
         self.assertEqual(self.buf[0:256], [None for i in range(0, 256)])
-        for i in range(0,256):
+        '''
+        for i in range(0, 256):
             self.buf[i] = 255
         self.assertEqual(self.buf[0:256], [255 for i in range(0, 256)])
         
     def testReadSlice(self):
         """Tests reading from buffer using slice notation"""
-        temp = [j for i in range(0,256) for j in range(0,256)]
+        temp = [j for i in range(0, 256) for j in range(0, 256)]
         
         #test reading with None slice inputs
         self.assertEqual(self.buf[:], temp)
@@ -93,10 +99,10 @@ class BufferTest(unittest.TestCase):
         self.assertEqual(self.buf[0::1], temp)
         
         #read beyond EOF
-        self.assertEqual(self.buf[0:256*256 + 1024], temp + [None for i in range(0,1024)])
-        self.assertEqual(self.buf[:256*256 + 1024], temp + [None for i in range(0,1024)])
-        self.assertEqual(self.buf[0:256*256 + 1024:], temp + [None for i in range(0,1024)])
-        self.assertEqual(self.buf[:256*256 + 1024:1], temp + [None for i in range(0,1024)])        
+        self.assertEqual(self.buf[0:256*256 + 1024], temp + [None for i in range(0, 1024)])
+        self.assertEqual(self.buf[:256*256 + 1024], temp + [None for i in range(0, 1024)])
+        self.assertEqual(self.buf[0:256*256 + 1024:], temp + [None for i in range(0, 1024)])
+        self.assertEqual(self.buf[:256*256 + 1024:1], temp + [None for i in range(0, 1024)])        
         
         #read a subsection to EOF
         self.assertEqual(self.buf[1024:], temp[1024:])
@@ -111,19 +117,20 @@ class BufferTest(unittest.TestCase):
         self.assertEqual(self.buf[1024:256*256-1024:1], temp[1024:256*256-1024])
         
         #read a subsection to after EOF
-        self.assertEqual(self.buf[1024:256*256+1024], temp[1024:] + [None for i in range(0,1024)])
-        self.assertEqual(self.buf[1024:256*256+1024:], temp[1024:] + [None for i in range(0,1024)])
-        self.assertEqual(self.buf[1024:256*256+1024:1], temp[1024:] + [None for i in range(0,1024)])
+        self.assertEqual(self.buf[1024:256*256+1024], temp[1024:] + [None for i in range(0, 1024)])
+        self.assertEqual(self.buf[1024:256*256+1024:], temp[1024:] + [None for i in range(0, 1024)])
+        self.assertEqual(self.buf[1024:256*256+1024:1], temp[1024:] + [None for i in range(0, 1024)])
         
         #read a subsection from EOF to EOF
-        self.assertEqual(self.buf[256*256:256*256+1024], [None for i in range(0,1024)])
-        self.assertEqual(self.buf[256*256+1024:256*256+1024*2], [None for i in range(0,1024)])
+        self.assertEqual(self.buf[256*256:256*256+1024], [None for i in range(0, 1024)])
+        self.assertEqual(self.buf[256*256+1024:256*256+1024*2], [None for i in range(0, 1024)])
         
     def testReadSliceSingle(self):
+        """Tests reading a slice of len == 0"""
         self.assertEqual(self.buf[:1], [0])
-        self.asseetEqual(self.buf[0:1], [0])
+        self.assertEqual(self.buf[0:1], [0])
         self.assertEqual(self.buf[:1:], [0])
-        self.asseetEqual(self.buf[0:1:1], [0])
+        self.assertEqual(self.buf[0:1:1], [0])
         self.assertEqual(self.buf[256*256-1:], [255])
         self.assertEqual(self.buf[256*256-1:256*256], [255])
         self.assertEqual(self.buf[256*256-1::], [255])
@@ -149,32 +156,25 @@ class BufferTest(unittest.TestCase):
     def testLen(self):
         """Tests len() works properly, even after writes"""
         self.assertEqual(len(self.buf), 256*256)
-        self.buf[256*256-1] = None
-        self.assertEqual(len(self.buf), 256*256-1)
+        #self.buf[256*256-1] = None
+        #self.assertEqual(len(self.buf), 256*256-1)
         self.buf[256*256-1] = 255
         self.assertEqual(len(self.buf), 256*256)
         self.buf[256*256+256] = 0
         self.assertEqual(len(self.buf), 256*256+256+1)
-        self.buf[256*256+256] = None
-        self.assertEqual(len(self.buf), 256*256)
-        for i in range(0,10):
-            self.buf[i] = None
-        self.assertEqual(len(self.buf), 256*256)
-        for i in range(0,256*256+1024):
-            self.assertEqual(len(self.buf), 0)
+        #self.buf[256*256+256] = None
+        #self.assertEqual(len(self.buf), 256*256)
+        for i in range(0, 10):
+            self.buf[i] = 1
+        self.assertEqual(len(self.buf), 256*256+256+1)
             
     def testMask(self):
         """Test that bitmap of changed bytes is valid"""
-        empty = [False for i in range(0,256*256+1024)]
+        empty = [False for i in range(0, 256*256+1024)]
         
         self.assertEqual(self.buf.mask(0), False)
         self.assertEqual(self.buf.mask(256*256), False)
         self.assertEqual(self.buf.mask(256*256+1024), False)
-        
-        self.assertEqual(self.buf.mask(0,256*256), [False for i in range(0,256*256)])
-        self.assertEqual(self.buf.mask(0,256*256+1024), [False for i in range(0,256*256+1024)])
-        self.assertEqual(self.buf.mask(1024,256*256), [False for i in range(1024,256*256)])
-        self.assertEqual(self.buf.mask(1024,256*256+1024), [False for i in range(1024,256*256+1024)])
         
     def testBlockEviction(self):
         assert self.buf._blockSize == 4096
@@ -189,35 +189,35 @@ class BufferTest(unittest.TestCase):
         
         #test reading all bytes from one block
         self.buf.refresh()
-        for i in range(0,4096):
+        for i in range(0, 4096):
             self.buf[i]
             self.assertEqual(len(self.buf._readBuffer), 1)
             self.assertEqual(sorted(self.buf._readBuffer.keys()), [0])
         
         #test reading one byte from 8 blocks
         self.buf.refresh()
-        for j in range(0,16):
-            for i in range(0+j,8+j):
+        for j in range(0, 16):
+            for i in range(0+j, 8+j):
                 self.buf[i*4096]
             self.assertEqual(len(self.buf._readBuffer), 8)
-            self.assertEqual(sorted(self.buf._readBuffer.keys()), [i*4096 for i in range(0+j,8+j)])
+            self.assertEqual(sorted(self.buf._readBuffer.keys()), [i*4096 for i in range(0+j, 8+j)])
             
         #test reading one byte from 8 blocks
         self.buf.refresh()
-        for j in range(0,16):
-            for i in range(8-1+j,0-1+j,-1): #reverse read order
+        for j in range(0, 16):
+            for i in range(8-1+j, 0-1+j, -1): #reverse read order
                 self.buf[i*4096]
             self.assertEqual(len(self.buf._readBuffer), 8)
-            self.assertEqual(sorted(self.buf._readBuffer.keys()), [i*4096 for i in range(0+j,8+j)])
+            self.assertEqual(sorted(self.buf._readBuffer.keys()), [i*4096 for i in range(0+j, 8+j)])
             
         #test reading one byte at x offset from boundry from 8 blocks
         self.buf.refresh()
-        for k in range(0,4096,16):
-            for j in range(0,16):
-                for i in range(0+j,8+j):
+        for k in range(0, 4096, 16):
+            for j in range(0, 16):
+                for i in range(0+j, 8+j):
                     self.buf[i*4096+k]
                 self.assertEqual(len(self.buf._readBuffer), 8)
-                self.assertEqual(sorted(self.buf._readBuffer.keys()), [i*4096 for i in range(0+j,8+j)])        
+                self.assertEqual(sorted(self.buf._readBuffer.keys()), [i*4096 for i in range(0+j, 8+j)])        
         
     def testRaisedError(self):
         with self.assertRaises(ValueError):
