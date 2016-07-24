@@ -431,7 +431,7 @@ class window:
             text += "Size: " + "{0:7.2f}".format(fileSize)
             text += " B"
         
-        text += "     Location:" + ("0x" + hex(math.floor(window.curser))[2:].upper()).rjust(24, " ")
+        text += "     Location:" + ("0x" + hex(window.curser)[2:].upper()).rjust(24, " ")
         text += "/" + ("0x" + hex(fileSize)[2:].upper()).rjust(24, " ")
         
         return text + "\n"
@@ -455,14 +455,14 @@ class window:
                     line += " "
                 
                 
-                if ((window.curser == i * 16 + j) and (mode == "HEX")): #large 4 bits
+                if ((window.curser == i * 16 + j) and (mode == "HEX") and (window.halfbyte == False)): #large 4 bits
                     line += "-"
                 elif (buffer[i * 16 + j] == None):
                     line += "_"
                 else:
                     line += hex(buffer[i * 16 + j] // 16)[2:].upper()
                 
-                if ((window.curser == i * 16 + j + 0.5) and (mode == "HEX")): #small 4 bits
+                if ((window.curser == i * 16 + j) and (mode == "HEX") and (window.halfbyte == True)): #small 4 bits
                     line += "-"
                 elif (buffer[i * 16 + j] == None):
                     line += "_"
@@ -471,7 +471,7 @@ class window:
 
             line += "| "
             for j in range(0, 16):
-                if ((math.floor(window.curser) == i * 16 + j) and (mode == "TEXT")):
+                if ((window.curser == i * 16 + j) and (mode == "TEXT")):
                     line += "-"
                 elif (buffer[i * 16 + j] == None):
                     line += " "
@@ -555,9 +555,12 @@ def _down():
 def _left():
     """Move curser left, sets curser Location, adjusts screen location as needed"""
     global mode
-    
+    oldCurser = window.curser
     if (mode == "HEX"):
-        moveAmount = 0.5
+        if window.halfbyte == False:
+            moveAmount = 1
+        else:
+            moveAmount = 0
     elif (mode == "TEXT"):
         moveAmount = 1
     
@@ -565,18 +568,26 @@ def _left():
         window.screen = max(0, window.screen - 16)
     window.curser = max(0, window.curser - moveAmount)
     
+    if not ((oldCurser == 0) and (window.halfbyte == False)):
+        window.halfbyte = not window.halfbyte
+    
 def _right():
     """Move curser right, sets curser Location, adjusts screen location as needed"""
     global mode
     
     if (mode == "HEX"):
-        moveAmount = 0.5
+        if window.halfbyte == True:
+            moveAmount = 1
+        else:
+            moveAmount = 0
     elif (mode == "TEXT"):
         moveAmount = 1
     
     if (((window.curser + moveAmount)// 16) * 16 - window.screen) >= 256:
         window.screen = window.screen + 16
     window.curser = window.curser + moveAmount
+    window.halfbyte = not window.halfbyte
+    
 
 def _up():
     """Move curser up, sets curser Location, adjusts screen location as needed"""
@@ -604,12 +615,12 @@ They return values for success, can print directly to the console, can raise err
 '''
 def goto(x):
     """Moves curser to x, adjusts screen location accordingly"""
-    if (not ((type(x) == int) or (type(x) == float))):
+    if (not (type(x) == int)):
         raise TypeError
     elif (x < 0):
         raise ValueError
     
-    window.curser = math.floor(x * 2) / 2
+    window.curser = x
     window.screen = int(x // 16) * 16
     debug.debug("goto", window.curser, window.screen)
     return 0
@@ -721,10 +732,8 @@ def saveAs(path):
 def quit():
     """Closes the current session"""
     global buffer
-    global debug
     print("Py3HexEditLite.py is quiting")
     buffer.close()
-    del(debug)
     exit(0)
     
 ''' #possible future API
