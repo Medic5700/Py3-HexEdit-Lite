@@ -399,17 +399,15 @@ class Buffer:
 
 class window:
     """Handles printing and formating the interface"""
+    #initilization code at end of class definition
     #keep to 39 characters in window width, in case displaying on different sized console windows
-    curser = 0
-    screen = 0
-    halfbyte = 0.0
     
     def interface():
         """Prints the interface window"""
         text = ""
-        text += window._header()
-        text += window._body()
-        text += window._footer()
+        text += window.header()
+        text += window.body()
+        text += window.footer()
         print(text)
     
     def _header():
@@ -433,21 +431,19 @@ class window:
             text += "Size: " + "{0:7.2f}".format(fileSize)
             text += " B"
         
-        text += "     Location:" + ("0x" + hex(math.floor(curserLocation))[2:].upper()).rjust(24, " ")
+        text += "     Location:" + ("0x" + hex(math.floor(window.curser))[2:].upper()).rjust(24, " ")
         text += "/" + ("0x" + hex(fileSize)[2:].upper()).rjust(24, " ")
         
         return text + "\n"
     
     def _body():
         """Returns String representing 16 lines where you can edit stuff, newline terminated"""
-        global screenLocation
-        global curserLocation 
         global buffer
         
         text = ""
         line = ""
-        #debug.debug("_body", curserLocation, screenLocation, mode)
-        for i in range(screenLocation // 16, screenLocation // 16 + 16):
+        #debug.debug("_body", window.curser, window.screen, mode)
+        for i in range(window.screen // 16, window.screen // 16 + 16):
             line = hex(i * 16)[2:].upper().rjust(11, " ") + "|" #TODO: fix size of number printing to large on large numbers
             for j in range(0, 16):
                 if (j == 8): #prints column sperater at the 8 Byte mark
@@ -459,14 +455,14 @@ class window:
                     line += " "
                 
                 
-                if ((curserLocation == i * 16 + j) and (mode == "HEX")): #large 4 bits
+                if ((window.curser == i * 16 + j) and (mode == "HEX")): #large 4 bits
                     line += "-"
                 elif (buffer[i * 16 + j] == None):
                     line += "_"
                 else:
                     line += hex(buffer[i * 16 + j] // 16)[2:].upper()
                 
-                if ((curserLocation == i * 16 + j + 0.5) and (mode == "HEX")): #small 4 bits
+                if ((window.curser == i * 16 + j + 0.5) and (mode == "HEX")): #small 4 bits
                     line += "-"
                 elif (buffer[i * 16 + j] == None):
                     line += "_"
@@ -475,7 +471,7 @@ class window:
 
             line += "| "
             for j in range(0, 16):
-                if ((math.floor(curserLocation) == i * 16 + j) and (mode == "TEXT")):
+                if ((math.floor(window.curser) == i * 16 + j) and (mode == "TEXT")):
                     line += "-"
                 elif (buffer[i * 16 + j] == None):
                     line += " "
@@ -491,6 +487,14 @@ class window:
         """Returns String 4 lines max with any additional information needed, newline terminated"""
         global mode
         return "[" + mode + "]"
+    
+    #gets around having to instatiate this class (thus easier to modify) by putting initilization code at the end of class definition
+    curser = 0
+    screen = 0 #in multiples of 16
+    halfbyte = False    
+    header = _header
+    body = _body
+    footer = _footer
 
 #control functions, not inteneded to be directly accesable to the user
 def _command():
@@ -542,18 +546,14 @@ def _command():
                 line = ""
     
 def _down():
-    """Move curser down, sets curserLocation, adjusts screenLocation as needed"""
-    global curserLocation
-    global screenLocation
+    """Move curser down, sets curser Location, adjusts screen location as needed"""
     
-    if (((curserLocation + 16)// 16) * 16 - screenLocation) >= 256:
-        screenLocation = screenLocation + 16
-    curserLocation = curserLocation + 16
+    if (((window.curser + 16)// 16) * 16 - window.screen) >= 256:
+        window.screen = window.screen + 16
+    window.curser = window.curser + 16
     
 def _left():
-    """Move curser left, sets curserLocation, adjusts screenLocation as needed"""
-    global curserLocation
-    global screenLocation
+    """Move curser left, sets curser Location, adjusts screen location as needed"""
     global mode
     
     if (mode == "HEX"):
@@ -561,14 +561,12 @@ def _left():
     elif (mode == "TEXT"):
         moveAmount = 1
     
-    if (screenLocation > curserLocation - moveAmount):
-        screenLocation = max(0, screenLocation - 16)
-    curserLocation = max(0, curserLocation - moveAmount)
+    if (window.screen > window.curser - moveAmount):
+        window.screen = max(0, window.screen - 16)
+    window.curser = max(0, window.curser - moveAmount)
     
 def _right():
-    """Move curser right, sets curserLocation, adjusts screenLocation as needed"""
-    global curserLocation
-    global screenLocation
+    """Move curser right, sets curser Location, adjusts screen location as needed"""
     global mode
     
     if (mode == "HEX"):
@@ -576,23 +574,20 @@ def _right():
     elif (mode == "TEXT"):
         moveAmount = 1
     
-    if (((curserLocation + moveAmount)// 16) * 16 - screenLocation) >= 256:
-        screenLocation = screenLocation + 16
-    curserLocation = curserLocation + moveAmount
+    if (((window.curser + moveAmount)// 16) * 16 - window.screen) >= 256:
+        window.screen = window.screen + 16
+    window.curser = window.curser + moveAmount
 
 def _up():
-    """Move curser up, sets curserLocation, adjusts screenLocation as needed"""
-    global curserLocation
-    global screenLocation
+    """Move curser up, sets curser Location, adjusts screen location as needed"""
     
-    if (screenLocation > curserLocation - 16):
-        screenLocation = max(0, screenLocation - 16)
-    if (curserLocation >= 16):
-        curserLocation = curserLocation - 16
+    if (window.screen > window.curser - 16):
+        window.screen = max(0, window.screen - 16)
+    if (window.curser >= 16):
+        window.curser = window.curser - 16
     
 def _write(location, halfbyte):
-    """Write a single half-byte to the current curserLocation, use only when in HEX mode"""
-    global curserLocation
+    """Write a single half-byte to the current curser Location, use only when in HEX mode"""
 
     number = int(halfbyte,16)
     if ((location - math.floor(location)) == 0):
@@ -608,17 +603,15 @@ def _write(location, halfbyte):
 They return values for success, can print directly to the console, can raise errors (depending on how 'user friendly' vs 'part of a function' it's ment to be
 '''
 def goto(x):
-    """Moves curser to x, adjusts screenLocation accordingly"""
-    global curserLocation
-    global screenLocation
+    """Moves curser to x, adjusts screen location accordingly"""
     if (not ((type(x) == int) or (type(x) == float))):
         raise TypeError
     elif (x < 0):
         raise ValueError
     
-    curserLocation = math.floor(x * 2) / 2
-    screenLocation = int(x // 16) * 16
-    debug.debug("goto", curserLocation, screenLocation)
+    window.curser = math.floor(x * 2) / 2
+    window.screen = int(x // 16) * 16
+    debug.debug("goto", window.curser, window.screen)
     return 0
     
 def newFile(path):
@@ -754,8 +747,6 @@ if __name__ == "__main__":
     #debug.debug("Starting Py3HexEditLite.py===================================")
     
     #globals
-    curserLocation = 0.0 #A real, since in hex, a byte is represented as 2 hex chars
-    screenLocation = 0 #in multiples of 16
     mode = "HEX"
     buffer = None
     filePath = None
@@ -793,8 +784,8 @@ if __name__ == "__main__":
             _command()
             '''
             elif (raw == "DEL"):
-                buffer[int(math.floor(curserLocation))] = None
-                #_write(curserLocation, None)
+                buffer[int(math.floor(window.curser))] = None
+                #_write(window.curser, None)
             '''
         elif (raw == "CTRL+S"):
             save()
@@ -802,11 +793,11 @@ if __name__ == "__main__":
             quit()        
         elif (len(raw) == 1): #single character input
             if (mode == "HEX") and ((chr(ord(raw)) in "1234567890abcdefABCDEF")):
-                _write(curserLocation, raw)
+                _write(window.curser, raw)
                 _right()
-                debug.debug("HEX raw", raw)
+                #debug.debug("HEX raw", raw)
             elif (mode == "TEXT") and ((chr(ord(raw))).isprintable()):
-                buffer[int(math.floor(curserLocation))] = ord(raw)
+                buffer[int(math.floor(window.curser))] = ord(raw)
                 _right()
             if (chr(ord(raw)) == "\t"):
                 if (mode == "HEX"):
