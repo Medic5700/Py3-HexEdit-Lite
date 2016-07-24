@@ -1,43 +1,54 @@
 This program is a lightweight Hex Editor built in Python3, usable within the command line.
-Designed to be simple to start using on the spot (assuming you have python3 installed), and to have as few dependencies as possible.
+Designed to be simple to start using on the spot (assuming you have python3 installed), and to have as few dependencies as possible. Also features a COMMAND mode (access to the python interpriter) allowing for customizability and quick scripting.
 Status: Currently a usable prototype, still WIP
 
 Running:
     Download and run Py3HexEditLite.py with Python3 #you can give a file name for an arg to open
     You can also enter a filename when you open it if no args were given #path is relitive to where Py3HexEditLite.py is located
-    Note: CTRL+C will not exit, use CTRL+Q
+    Note: CTRL+C will not exit, use CTRL+Q or quit() in COMMAND mode
 
 Controls:
     Arrow keys   - move curser
     CTRL+Q       - quit program
     CTRL+S       - save
+    TAB          - switch between editing in HEX mode and ASCII mode
     A hex number - write a byte at curser location
+    ENTER        - enter python command(s)
+
+Commands:
+    quit()
+    openFile(filepath)
+    goto(offset)
+    saveAs(filepath)
+    save()
+    newFile(filepath)
 
 Features:
-    Supports large files #should be able to
+    Supports large files (WIP)
     Read/Edit a file
 
 Dependincies:
-    Python3
+    Python3.5 (tested in python 3.5.2) [may be backwards compatible with earlier versions of python3, results will vary]
     
 Interface: This is what the interface looks like:
 
-Py3HexEditLite v0.3    File:ReadMe.txt
-Size:  715.00  B Buffer:XXX%|XXX% Location:               0x0/             0x2CB
-000000000000| -4 68 69 73 20 70 72 6F| 67 72 61 6D 20 69 73 20| This program is
-000000000010| 61 20 6C 69 67 68 74 77| 65 69 67 68 74 20 48 65| a lightweight He
-000000000020| 78 20 45 64 69 74 6F 72| 20 62 75 69 6C 74 20 69| x Editor built i
-000000000030| 6E 20 50 79 74 68 6F 6E| 33 2C 20 75 73 61 62 6C| n Python3, usabl
-000000000040| 65 20 77 69 74 68 69 6E| 20 74 68 65 20 63 6F 6D| e within the com
-000000000050| 6D 61 6E 64 20 6C 69 6E| 65 2E 0D 0A 49 45 3A 20| mand line...IE:
-000000000060| 53 74 6F 70 20 70 72 65| 70 61 69 72 69 6E 67 20| Stop prepairing
-000000000070| 74 6F 20 68 65 78 20 65| 64 69 74 2C 20 6A 75 73| to hex edit, jus
-000000000080| 74 20 68 65 78 20 65 64| 69 74 0D 0A 0D 0A 53 74| t hex edit....St
-000000000090| 61 74 75 73 3A 20 43 75| 72 72 65 6E 74 6C 79 20| atus: Currently
-0000000000A0| 61 20 75 73 61 62 6C 65| 20 70 72 6F 74 6F 74 79| a usable prototy
-0000000000B0| 70 65 20 28 49 45 3A 20| 41 6C 70 68 61 29 0D 0A| pe (IE: Alpha)..
-0000000000C0| 0D 0A 55 73 69 6E 67 3A| 0D 0A 20 20 20 20 52 75| ..Using:..    Ru
-0000000000D0| 6E 20 50 79 33 48 65 78| 45 64 69 74 4C 69 74 65| n Py3HexEditLite
-0000000000E0| 2E 70 79 20 77 69 74 68| 20 50 79 74 68 6F 6E 33| .py with Python3
-0000000000F0| 20 23 79 6F 75 20 63 61| 6E 20 67 69 76 65 20 61|  #you can give a
-[Hex]
+Py3HexEditLite v0.5    File:ReadMe.txt
+Buffers:  Read:0   Write:0    Undo:0
+Size:    2.55 KB     Location:                     0x0/                   0xA33
+          0| -4 68 69 73 20 70 72 6F| 67 72 61 6D 20 69 73 20| This program is
+         10| 61 20 6C 69 67 68 74 77| 65 69 67 68 74 20 48 65| a lightweight He
+         20| 78 20 45 64 69 74 6F 72| 20 62 75 69 6C 74 20 69| x Editor built i
+         30| 6E 20 50 79 74 68 6F 6E| 33 2C 20 75 73 61 62 6C| n Python3, usabl
+         40| 65 20 77 69 74 68 69 6E| 20 74 68 65 20 63 6F 6D| e within the com
+         50| 6D 61 6E 64 20 6C 69 6E| 65 2E 0D 0A 44 65 73 69| mand line...Desi
+         60| 67 6E 65 64 20 74 6F 20| 62 65 20 73 69 6D 70 6C| gned to be simpl
+         70| 65 20 74 6F 20 73 74 61| 72 74 20 75 73 69 6E 67| e to start using
+         80| 20 6F 6E 20 74 68 65 20| 73 70 6F 74 20 28 61 73|  on the spot (as
+         90| 73 75 6D 69 6E 67 20 79| 6F 75 20 68 61 76 65 20| suming you have
+         A0| 70 79 74 68 6F 6E 33 20| 69 6E 73 74 61 6C 6C 65| python3 installe
+         B0| 64 29 2C 20 61 6E 64 20| 74 6F 20 68 61 76 65 20| d), and to have
+         C0| 61 73 20 66 65 77 20 64| 65 70 65 6E 64 65 6E 63| as few dependenc
+         D0| 69 65 73 20 61 73 20 70| 6F 73 73 69 62 6C 65 2E| ies as possible.
+         E0| 0D 0A 53 74 61 74 75 73| 3A 20 43 75 72 72 65 6E| ..Status: Curren
+         F0| 74 6C 79 20 61 20 75 73| 61 62 6C 65 20 70 72 6F| tly a usable pro
+[HEX]
