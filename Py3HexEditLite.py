@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
-import code
+import code #for using/acessing the interpriter (IE: COMMAND mode)
 import math
 import os
 import sys
+import traceback #for error handling in interpriter (IE: COMMAND mode)
 
 version = "v0.5"
 
@@ -501,21 +502,19 @@ def _command():
     """prompts and execute commands within the current python3 environement"""
     # https://docs.python.org/3.5/library/code.html
     #TODO: handle keyboard escape (IE: CTRL-C)
-    global buffer
-    
     compiledCode = None
     userCode = ""
     line = ""
     
     while True:
-        line = input(">>>")
+        line = input(">>>") #get first line in a multiline codeblock
         if line == "":
             break
         userCode += line
 
         try:
-            compiledCode = code.compile_command(userCode)
-            while compiledCode == None:
+            compiledCode = code.compile_command(userCode) #if first line compiles, the codeblock was a one liner, skip to executing it
+            while compiledCode == None: #get lines until codeblock compiles, syntax error is raised, or "" is entered
                 line = input("...")
                 if line == "":
                     userCode += "\n"
@@ -524,7 +523,6 @@ def _command():
                 debug.debug("_command -> waiting for more", line, userCode, compiledCode)
                 compiledCode = code.compile_command(userCode)
         except Exception:
-            import traceback
             compiledCode = None
             userCode = ""
             line = ""
@@ -532,11 +530,10 @@ def _command():
             traceback.print_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2])
             #traceback.print_last() #will not work, raises an exception while printing an exception
                 
-        if compiledCode != None:
+        if compiledCode != None: # execute codeblock iff compiles, incase codeblock raises an error in compiliation resulting in compiledCode == None
             try:
                 exec(compiledCode, globals())
             except Exception:
-                import traceback
                 #debug.debug("_command -> exec", sys.exc_info())
                 traceback.print_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2])
                 #traceback.print_last() #will not work, raises an exception while printing an exception
