@@ -596,18 +596,18 @@ def _up():
     if (window.curser >= 16):
         window.curser = window.curser - 16
     
-def _write(location, halfbyte):
+def _write(halfbyte):
     """Write a single half-byte to the current curser Location, use only when in HEX mode"""
 
     number = int(halfbyte,16)
-    if ((location - math.floor(location)) == 0):
-        if (buffer[int(math.floor(location))] == None):
-            buffer[int(math.floor(location))] = 0
-        buffer[int(math.floor(location))] = number * 16 + (buffer[int(math.floor(location))] % 16)
-    elif ((location - math.floor(location)) == 0.5):
-        if (buffer[int(math.floor(location))] == None):
-            buffer[int(math.floor(location))] = 0
-        buffer[int(math.floor(location))] = (buffer[int(math.floor(location))] // 16) * 16 + number
+    if (window.halfbyte == False):
+        if (buffer[window.curser] == None):
+            buffer[window.curser] = 0
+        buffer[window.curser] = number * 16 + (buffer[window.curser] % 16)
+    elif (window.halfbyte == True):
+        if (buffer[window.curser] == None):
+            buffer[window.curser] = 0
+        buffer[window.curser] = (buffer[window.curser] // 16) * 16 + number
 
 ''' API, accessable by user in 'COMMAND' mode
 They return values for success, can print directly to the console, can raise errors (depending on how 'user friendly' vs 'part of a function' it's ment to be
@@ -801,7 +801,7 @@ if __name__ == "__main__":
             quit()        
         elif (len(raw) == 1): #single character input
             if (mode == "HEX") and ((chr(ord(raw)) in "1234567890abcdefABCDEF")):
-                _write(window.curser, raw)
+                _write(raw)
                 _right()
                 #debug.debug("HEX raw", raw)
             elif (mode == "TEXT") and ((chr(ord(raw))).isprintable()):
