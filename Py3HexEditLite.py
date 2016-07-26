@@ -443,9 +443,11 @@ class window:
         
         text = ""
         line = ""
-        #debug.debug("_body", window.curser, window.screen, mode)
+        
         for i in range(window.screen // 16, window.screen // 16 + 16):
-            line = hex(i * 16)[2:].upper().rjust(11, " ") + "|" #TODO: fix size of number printing to large on large numbers
+            #line = hex(i * 16)[2:].upper().rjust(11, " ") + "|" #TODO: fix size of number printing to large on large numbers
+            line = hex(i * 16)[2:][max(-(len(hex(i * 16))), -11):].upper().rjust(11, " ")
+            line += "|"
             for j in range(0, 16):
                 if (j == 8): #prints column sperater at the 8 Byte mark
                     line += "|"
