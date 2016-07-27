@@ -444,42 +444,43 @@ class window:
         text = ""
         line = ""
         
-        for i in range(window.screen // 16, window.screen // 16 + 16):
+        temp = buffer[window.screen:window.screen + 256]
+        for i in range(0, 16):
             #line = hex(i * 16)[2:].upper().rjust(11, " ") + "|" #TODO: fix size of number printing to large on large numbers
-            line = hex(i * 16)[2:][max(-(len(hex(i * 16))), -11):].upper().rjust(11, " ")
+            line = hex(window.screen + i * 16)[2:][max(-(len(hex(window.screen + i * 16))), -11):].upper().rjust(11, " ")
             line += "|"
             for j in range(0, 16):
                 if (j == 8): #prints column sperater at the 8 Byte mark
                     line += "|"
                 
-                if buffer.mask(i * 16 + j): #prints indicator for changed byte
+                if buffer.mask(window.screen + i * 16 + j): #prints indicator for changed byte
                     line += "*"
                 else:
                     line += " "
                 
                 
-                if ((window.curser == i * 16 + j) and (mode == "HEX") and (window.halfbyte == False)): #large 4 bits
+                if ((window.curser == window.screen + i * 16 + j) and (mode == "HEX") and (window.halfbyte == False)): #large 4 bits
                     line += "-"
-                elif (buffer[i * 16 + j] == None):
+                elif (temp[i * 16 + j] == None):
                     line += "_"
                 else:
-                    line += hex(buffer[i * 16 + j] // 16)[2:].upper()
+                    line += hex(temp[i * 16 + j] // 16)[2:].upper()
                 
-                if ((window.curser == i * 16 + j) and (mode == "HEX") and (window.halfbyte == True)): #small 4 bits
+                if ((window.curser == window.screen + i * 16 + j) and (mode == "HEX") and (window.halfbyte == True)): #small 4 bits
                     line += "-"
-                elif (buffer[i * 16 + j] == None):
+                elif (temp[i * 16 + j] == None):
                     line += "_"
                 else:
-                    line += hex(buffer[i * 16 + j] % 16)[2:].upper()
+                    line += hex(temp[i * 16 + j] % 16)[2:].upper()
 
             line += "| "
             for j in range(0, 16):
-                if ((window.curser == i * 16 + j) and (mode == "TEXT")):
+                if ((window.curser == window.screen + i * 16 + j) and (mode == "TEXT")):
                     line += "-"
-                elif (buffer[i * 16 + j] == None):
+                elif (temp[i * 16 + j] == None):
                     line += " "
-                elif chr(buffer[i * 16 + j]).isprintable():
-                    line += chr(buffer[i * 16 + j])
+                elif chr(temp[i * 16 + j]).isprintable():
+                    line += chr(temp[i * 16 + j])
                 else:
                     line += "."
             
