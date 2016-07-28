@@ -557,11 +557,12 @@ def _command():
                 userCode = ""
                 line = ""
     
-def _down():
+def _down(x = 16):
     """Move curser down, sets curser Location, adjusts screen location as needed"""
-    if (((window.curser + 16)// 16) * 16 - window.screen) >= 256:
-        window.screen = window.screen + 16
-    window.curser = window.curser + 16
+    move = (x // 16) * 16
+    if (((window.curser + move)// 16) * 16 - window.screen) >= 256:
+        window.screen = window.screen + move
+    window.curser = window.curser + move
     
 def _left():
     """Move curser left, sets curser Location, adjusts screen location as needed"""
@@ -601,12 +602,13 @@ def _right():
     window.halfbyte = not window.halfbyte
     
 
-def _up():
+def _up(x = 16):
     """Move curser up, sets curser Location, adjusts screen location as needed"""
-    if (window.screen > window.curser - 16):
-        window.screen = max(0, window.screen - 16)
-    if (window.curser >= 16):
-        window.curser = window.curser - 16
+    move = (x // 16) * 16
+    if (window.screen > window.curser - move):
+        window.screen = max(0, window.screen - move)
+    if (window.curser >= move):
+        window.curser = window.curser - move
     
 def _write(halfbyte):
     """Write a single half-byte to the current curser Location, use only when in HEX mode"""
@@ -826,11 +828,10 @@ if __name__ == "__main__":
             _right()
         elif (raw == "ENTER"):
             _command()
-            '''
-            elif (raw == "DEL"):
-                buffer[int(math.floor(window.curser))] = None
-                #_write(window.curser, None)
-            '''
+        elif (raw == "PAGEUP"):
+            _up(256)
+        elif (raw == "PAGEDOWN"):
+            _down(256)
         elif (raw == "CTRL+S"):
             save()
         elif (raw == "CTRL+Q"):
