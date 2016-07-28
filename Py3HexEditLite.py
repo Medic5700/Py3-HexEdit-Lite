@@ -396,17 +396,36 @@ class window:
     #keep to 39 characters in window width, in case displaying on different sized console windows
     
     def _sanityCheck():
-        """Returns true if variables have sane/acceptable values"""
-        pass
-    
+        """varifies if variables have sane/acceptable values, raises appropriate errors"""
+        if not isinstance(window.curser, int):
+            raise TypeError("window.curser not int")
+        if window.curser < 0:
+            raise ValueError("window.curser not > 0")
+        if not isinstance(window.screen, int):
+            raise TypeError("window.screen not int")
+        if window.screen < 0:
+            raise ValueError("window.screen not > 0")
+        if (window.screen % 16 != 0):
+            raise ValueError("window.screen not multiple of 16")
+        if not isinstance(window.halfbyte, bool):
+            raise TypeError("window.halfbyte not bool")
+        if buffer == None: 
+            raise TypeError("buffer not initialized or missing") #TODO: is this the right error to raise
+        if abs(window.screen - window.curser) > 256: #auto-sets screen to curser if curser is out of screen range
+            window.screen = (window.curser // 16) * 16
+        
     def interface():
         """Prints the interface window"""
-        
-        text = ""
-        text += window.header()
-        text += window.body()
-        text += window.footer()
-        print(text, end="")
+        try:
+            window._sanityCheck()
+            text = ""
+            text += window.header()
+            text += window.body()
+            text += window.footer()
+            print(text, end="")
+        except Exception as i:
+            print("ERROR: Unable to print interface")
+            traceback.print_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2])
     
     def _header():
         """Returns String representing the first 4 lines of interface window, newline terminated"""
