@@ -153,7 +153,7 @@ class Buffer:
     
     def __init__(self, path): #TODO: implement ability to open file in readonly mode
         self.filePath = path
-        self.file = open(path, 'r+b') #does not handle exceptopns here, so calling function can handle raised exceptions
+        self.file = open(path, 'r+b') #does not handle exceptions here, so calling function can handle raised exceptions
         self.fileSize = self.file.seek(0,2)
         
         self._readBuffer = {} #contains blocks of data from the open file, stored as {Offset:[array of int 0<=x<=255 or None]}
@@ -167,7 +167,6 @@ class Buffer:
         
     def __del__(self):
         """Deconstructor, deletes variables in current instance of buffer"""
-        #I am parinoid about memory leaks
         # https://docs.python.org/3/reference/datamodel.html#object.__del__
         del(self._actionQueue[:])
         del(self._redoStack[:])
@@ -211,6 +210,7 @@ class Buffer:
                 
             i = start
             result = []
+            #TODO: improve effiency
             while (i < stop): #Goes through _readBuffer
                 if not ((i // self._blockSize) * self._blockSize in self._readBuffer.keys()):
                     self._cacheMiss(i)
@@ -218,6 +218,7 @@ class Buffer:
                 i += step
 
             i = start
+            #TODO: improve effiency
             while (i < stop): #Goes through _writeBuffer
                 if (i // self._blockSize) * self._blockSize in self._writeBuffer.keys():
                     if self._writeBuffer[(i // self._blockSize) * self._blockSize][i - (i // self._blockSize) * self._blockSize] != None:
@@ -243,7 +244,6 @@ class Buffer:
             for i in self._actionQueue:
                 if (i[0] == key):
                     result = i[1]
-            #debug.debug("Buffer __Getitem__", key, result)
             return result
         
     def __len__(self):
@@ -287,14 +287,6 @@ class Buffer:
             self._writeBuffer[(index // self._blockSize) * self._blockSize] = [None for i in range(0, self._blockSize)]
             self._writeBuffer[(index // self._blockSize) * self._blockSize][index - ((index // self._blockSize) * self._blockSize)] = value
     
-    ''' #no longer needed, replaced function call with code of function in calling functions
-    def _inCache(self, offset):
-        if ((offset // self._blockSize) * self._blockSize in self._readBuffer.keys()):
-            return True
-        else:
-            return False
-    '''
-    
     def _cacheMiss(self, offset):
         """loads a block of the file into memeory"""
         #Assumes the block being added to the _readBuffer is not already in the _readBuffer
@@ -336,9 +328,9 @@ class Buffer:
     def status(self):
         """returns string representing how 'full' the various buffers are"""
         text = ""
-        text += "Read:" + str(len(self._readBuffer) * self._blockSize) 
-        text += "   Write:" + str(len(self._writeBuffer) * self._blockSize) 
-        text += "    Undo:" + str(len(self._actionQueue))
+        text += "Read:" + "{0:7.2f}".format(len(self._readBuffer) / self._bufferSize)
+        text += "   Write:" + "{0:8}".format(len(self._writeBuffer) * self._blockSize) 
+        text += "    Undo:" + "{0:7.2f}".format(len(self._actionQueue) / self._undoSize)
         return text
     
     def mask(self, key):
@@ -379,7 +371,7 @@ class Buffer:
                 self.file.write((i[1]).to_bytes(1, sys.byteorder))
                 
         self.file.flush()
-        self.fileSize = self.file.seek(0,2) #resets fileSize
+        self.fileSize = self.file.seek(0, 2) #resets fileSize
         
         del(self._actionQueue[:])
         del(self._redoStack[:])
@@ -390,7 +382,7 @@ class Buffer:
             
     def refresh(self):
         """refreshes all buffers without writing/updating file"""
-        self.fileSize = self.file.seek(0,2) #resets fileSize
+        self.fileSize = self.file.seek(0, 2) #resets fileSize
         del(self._actionQueue[:])
         del(self._redoStack[:])
         for i in list(self._readBuffer.keys()):
@@ -403,13 +395,18 @@ class window:
     #initilization code at end of class definition
     #keep to 39 characters in window width, in case displaying on different sized console windows
     
+    def _sanityCheck():
+        """Returns true if variables have sane/acceptable values"""
+        pass
+    
     def interface():
         """Prints the interface window"""
+        
         text = ""
         text += window.header()
         text += window.body()
         text += window.footer()
-        print(text)
+        print(text, end="")
     
     def _header():
         """Returns String representing the first 4 lines of interface window, newline terminated"""
@@ -427,7 +424,7 @@ class window:
             try: #Just in case 2**10 years in the future, someone decides to open the entirety of the internet worth of a file in this hex editor...
                 text += " KMGTPEZY?????????????????????"[int(math.floor(math.log(fileSize, 1024)))] + "B"
             except IndexError:
-                text += "?B"            
+                text += "?B"
         else:
             text += "Size: " + "{0:7.2f}".format(fileSize)
             text += " B"
@@ -446,7 +443,6 @@ class window:
         
         temp = buffer[window.screen:window.screen + 256]
         for i in range(0, 16):
-            #line = hex(i * 16)[2:].upper().rjust(11, " ") + "|" #TODO: fix size of number printing to large on large numbers
             line = hex(window.screen + i * 16)[2:][max(-(len(hex(window.screen + i * 16))), -11):].upper().rjust(11, " ")
             line += "|"
             for j in range(0, 16):
@@ -474,7 +470,7 @@ class window:
                     line += hex(temp[i * 16 + j] % 16)[2:].upper()
 
             line += "| "
-            for j in range(0, 16):
+            for j in range(0, 16): #prints ASCII version of bytes
                 if ((window.curser == window.screen + i * 16 + j) and (mode == "TEXT")):
                     line += "-"
                 elif (temp[i * 16 + j] == None):
@@ -490,7 +486,7 @@ class window:
     def _footer():
         """Returns String 4 lines max with any additional information needed, newline terminated"""
         global mode
-        return "[" + mode + "]"
+        return "[" + mode + "]" + "\n"
     
     #gets around having to instatiate this class (thus easier to modify) by putting initilization code at the end of class definition
     curser = 0
@@ -503,7 +499,6 @@ class window:
 #control functions, not inteneded to be directly accesable to the user
 def _command():
     """prompts and execute commands within the current python3 environement"""
-    # https://docs.python.org/3.5/library/code.html
     #TODO: handle keyboard escape (IE: CTRL-C)
     compiledCode = None
     userCode = ""
@@ -523,7 +518,6 @@ def _command():
                     userCode += "\n"
                 else:
                     userCode += line
-                debug.debug("_command -> waiting for more", line, userCode, compiledCode)
                 compiledCode = code.compile_command(userCode)
         except Exception:
             compiledCode = None
@@ -531,15 +525,14 @@ def _command():
             line = ""
             
             traceback.print_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2])
-            #traceback.print_last() #will not work, raises an exception while printing an exception
+            #traceback.print_last() #NOTE: will not work, raises an exception while printing an exception
                 
         if compiledCode != None: # execute codeblock iff compiles, incase codeblock raises an error in compiliation resulting in compiledCode == None
             try:
                 exec(compiledCode, globals())
             except Exception:
-                #debug.debug("_command -> exec", sys.exc_info())
                 traceback.print_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2])
-                #traceback.print_last() #will not work, raises an exception while printing an exception
+                #traceback.print_last() #NOTE: will not work, raises an exception while printing an exception
             finally:
                 compiledCode = None
                 userCode = ""
@@ -547,7 +540,6 @@ def _command():
     
 def _down():
     """Move curser down, sets curser Location, adjusts screen location as needed"""
-    
     if (((window.curser + 16)// 16) * 16 - window.screen) >= 256:
         window.screen = window.screen + 16
     window.curser = window.curser + 16
@@ -555,6 +547,7 @@ def _down():
 def _left():
     """Move curser left, sets curser Location, adjusts screen location as needed"""
     global mode
+    
     oldCurser = window.curser
     if (mode == "HEX"):
         if window.halfbyte == False:
@@ -591,7 +584,6 @@ def _right():
 
 def _up():
     """Move curser up, sets curser Location, adjusts screen location as needed"""
-    
     if (window.screen > window.curser - 16):
         window.screen = max(0, window.screen - 16)
     if (window.curser >= 16):
@@ -599,7 +591,6 @@ def _up():
     
 def _write(halfbyte):
     """Write a single half-byte to the current curser Location, use only when in HEX mode"""
-
     number = int(halfbyte,16)
     if (window.halfbyte == False):
         if (buffer[window.curser] == None):
@@ -613,6 +604,31 @@ def _write(halfbyte):
 ''' API, accessable by user in 'COMMAND' mode
 They return values for success, can print directly to the console, can raise errors (depending on how 'user friendly' vs 'part of a function' it's ment to be
 '''
+#keep these function names lowercase for usability
+
+readme = """Py3HexEditLite.py quick help
+
+Controls:
+Arrow Keys    = Move Curser
+"""
+
+api = """A list of accessable variables/functions/etc in this program
+Buffer:
+window:
+
+buffer
+
+readme
+api
+
+goto(x)
+newfile(path)
+openfile(path)
+save()
+saveas(path)
+quit()
+"""
+
 def goto(x):
     """Moves curser to x, adjusts screen location accordingly"""
     if (not (type(x) == int)):
@@ -622,10 +638,9 @@ def goto(x):
     
     window.curser = x
     window.screen = int(x // 16) * 16
-    debug.debug("goto", window.curser, window.screen)
     return 0
     
-def newFile(path):
+def newfile(path):
     """Creates a new empty file"""
     global buffer
     if (type(path) != str):
@@ -640,9 +655,10 @@ def newFile(path):
         return -1
 
     openFile(path)
+    goto(0)
     return 0
 
-def openFile(path):
+def openfile(path):
     """opens a file for editing"""
     # https://docs.python.org/3/library/os.path.html#os.path.isfile
     '''#some stuff on direct drive access
@@ -694,22 +710,25 @@ def openFile(path):
         buffer.close()
         buffer = tempBuffer
     else:
-        debug.debug("assinging tempbuffer to buffer")
+        #debug.debug("assinging tempbuffer to buffer")
         buffer = tempBuffer
     
+    goto(0)
     return 0
 
 def save():
     """Saves current changes to currently open file"""
     global buffer
     global fileSize
+    
     buffer.flush()
     fileSize = buffer.fileSize
     return 0
     
-def saveAs(path):
+def saveas(path):
     """Takes a string representing a file path. Creates and opens a new file, saves the current changes, closes the old file"""
     global buffer
+    
     file = None
     try:
         file = open(path, "x+b")
@@ -732,6 +751,7 @@ def saveAs(path):
 def quit():
     """Closes the current session"""
     global buffer
+    
     print("Py3HexEditLite.py is quiting")
     buffer.close()
     exit(0)
@@ -753,7 +773,6 @@ def api():
 if __name__ == "__main__":
     debug = Debug(True)
     print("Starting Py3HexEditLite.py")
-    #debug.debug("Starting Py3HexEditLite.py===================================")
     
     #globals
     mode = "HEX"
@@ -769,9 +788,6 @@ if __name__ == "__main__":
         print("program has not been passed an argument, Opening interpriter")
         
     while (buffer == None):
-        #filePath = input("Enter a file path:")
-        #print("Attempting to open file: " + filePath)
-        #openFile(filePath)
         print("Please use openFile(\"filePath\") to open a file to edit")
         _command()
     
@@ -804,7 +820,6 @@ if __name__ == "__main__":
             if (mode == "HEX") and ((chr(ord(raw)) in "1234567890abcdefABCDEF")):
                 _write(raw)
                 _right()
-                #debug.debug("HEX raw", raw)
             elif (mode == "TEXT") and ((chr(ord(raw))).isprintable()):
                 buffer[int(math.floor(window.curser))] = ord(raw)
                 _right()
