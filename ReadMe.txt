@@ -1,17 +1,17 @@
 This program is a lightweight Hex Editor built in Python3, usable within the command line.
-Designed to be simple to start using on the spot (assuming you have python3 installed), and to have as few dependencies as possible. Also features a COMMAND mode (access to the python interpriter) allowing for customizability and quick scripting.
+Designed to be simple to start using on the spot (assuming you have python3 installed), and to have as few dependencies as possible. Also features a COMMAND mode (access to the python interpreter) allowing for customizability and quick scripting.
 Status: Currently a usable prototype, still WIP
 
 Running:
     Download and run Py3HexEditLite.py with Python3 #you can give a file name for an arg to open
-    You can also enter a filename when you open it if no args were given #path is relitive to where Py3HexEditLite.py is located
-    Note: CTRL+C will not exit, use CTRL+Q or quit() in COMMAND mode
+    You can also enter a filename when you open it if no args were given #path is relative to where Py3HexEditLite.py is located
+    Note: use CTRL+Q in HEX mode or quit() in COMMAND mode to exit
 
 Controls:
     Arrow keys   - move curser
     CTRL+Q       - quit program
     CTRL+S       - save
-    TAB          - switch between editing in HEX mode and ASCII mode
+    TAB          - switch between editing in HEX mode and TEXT mode
     A hex number - write a byte at curser location
     ENTER        - enter python command(s)
 
@@ -25,10 +25,10 @@ Commands:
 
 Features:
     Supports large files (WIP)
-    Read/Edit a file
-
-Dependincies:
-    Python3.5 (tested in python 3.5.2) [may be backwards compatible with earlier versions of python3, results will vary]
+    Read/Edit a file in HEX or TEXT mode
+    
+Dependencies:
+    Python3.5 (built in python 3.5.2)
     
 Interface: This is what the interface looks like:
 
