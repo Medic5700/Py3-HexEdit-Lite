@@ -524,7 +524,12 @@ def _command():
     line = ""
     
     while True:
-        line = input(">>>") #get first line in a multiline codeblock
+        try:
+            line = input(">>>") #get first line in a multiline codeblock
+        except KeyboardInterrupt:
+            traceback.print_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2])
+            break
+            
         if line == "":
             break
         userCode += line
@@ -533,11 +538,21 @@ def _command():
             compiledCode = code.compile_command(userCode) #if first line compiles, the codeblock was a one liner, skip to executing it
             while compiledCode == None: #get lines until codeblock compiles, syntax error is raised, or "" is entered
                 line = input("...")
+                '''
+                try:
+                    line = input("...")
+                except Exception:
+                    traceback.print_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2])
+                    line = ""
+                '''
                 if line == "":
                     userCode += "\n"
                 else:
                     userCode += line
                 compiledCode = code.compile_command(userCode)
+        except KeyboardInterrupt:
+            traceback.print_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2])
+            break
         except Exception:
             compiledCode = None
             userCode = ""
