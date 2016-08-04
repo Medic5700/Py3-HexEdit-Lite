@@ -147,11 +147,183 @@ class Keyboard:
                     return i
         return raw
 
-class Buffer:
+class FileBuffer:
     import os
     import math
     
-    def __init__(self, path): #TODO: implement ability to open file in readonly mode
+    def __init__(self, path):
+        self.filePath = path
+        self.file = open(path, 'r+b') #does not handle exceptions here, so calling function can handle raised exceptions
+        self.fileSize = self.file.seek(0,2)
+        
+        self._readBuffer = {} #contains blocks of data from the open file, stored as {Offset:[array of int 0<=x<=255 or None]}
+        self._writeBuffer = {} #contains blocks of data to be writen to file, stored as {Offset:[array of int 0<=x<=255 or None]}
+        self._blockSize = 4096 #Size the data block loaded from files
+        self._bufferSize = 8 #maximum number of read blocks to hold in memory
+        
+    def __del__(self):
+        """Deconstructor, deletes variables in current instance of buffer"""
+        # https://docs.python.org/3/reference/datamodel.html#object.__del__
+        del(self._readBuffer)
+        del(self._writeBuffer)
+        self.file.close()
+        
+        del(self._blockSize)
+        del(self._bufferSize)
+        
+        del(self.filePath)
+        del(self.file)
+        del(self.fileSize)
+        
+    '''
+    def __delitem__(self, index):
+        # currently unsuported until deleting a byte is properly thought out
+        # https://docs.python.org/3/reference/datamodel.html#object.__delitem__
+        self._actionQueue.append((index, None))
+        #TODO: change this to also shift bytes when needed
+    ''' 
+    
+    def __getitem__(self, key):
+        """returns array of ints and Nones (NOT BYTES)
+        
+        will return array of ints, or None in cases where beyond EOF
+        DO NOT itterate over directly with a 'for' loop, IndexError will not be raised, thus the for loop will NOT terminate
+        """
+        # https://docs.python.org/3/reference/datamodel.html#object.__getitem__
+        if (isinstance(key, slice)): #key is a slice
+            step = 1
+            start = 0
+            stop = self.__len__()
+            if (key.step != None):
+                step = key.step
+            if (key.start != None):
+                start = key.start
+            if (key.stop != None):
+                stop = key.stop
+                
+            i = start
+            result = []
+            #TODO: improve effiency
+            while (i < stop): #Goes through _readBuffer
+                if not ((i // self._blockSize) * self._blockSize in self._readBuffer.keys()):
+                    self._cacheMiss(i)
+                result.append(self._readBuffer[(i // self._blockSize) * self._blockSize][i - (i // self._blockSize) * self._blockSize])
+                i += step
+
+            i = start
+            #TODO: improve effiency
+            while (i < stop): #Goes through _writeBuffer
+                if (i // self._blockSize) * self._blockSize in self._writeBuffer.keys():
+                    if self._writeBuffer[(i // self._blockSize) * self._blockSize][i - (i // self._blockSize) * self._blockSize] != None:
+                        result[i - start] = self._writeBuffer[(i // self._blockSize) * self._blockSize][i - (i // self._blockSize) * self._blockSize]
+                i += step
+                    
+            return result
+        
+        else: #key is an int
+            if not (isinstance(5, int)):
+                raise TypeError
+            
+            if not ((key // self._blockSize) * self._blockSize in self._readBuffer.keys()):
+                self._cacheMiss(key)
+            result = self._readBuffer[(key // self._blockSize) * self._blockSize][key - (key // self._blockSize) * self._blockSize]
+            if (key // self._blockSize) * self._blockSize in self._writeBuffer.keys():
+                if self._writeBuffer[(key // self._blockSize) * self._blockSize][key - (key // self._blockSize) * self._blockSize] != None:
+                    result = self._writeBuffer[(key // self._blockSize) * self._blockSize][key - (key // self._blockSize) * self._blockSize]
+            return result
+
+    def __len__(self):
+        """Returns length equal to the last last byte available/altered"""
+        # https://docs.python.org/3/reference/datamodel.html#object.__len__
+        length = self.fileSize
+        if len(self._writeBuffer) != 0:
+            lastKey = sorted(self._writeBuffer.keys())[-1]
+            for i in range(self._blockSize - 1, -1, -1):
+                if self._writeBuffer[lastKey][i] != None:
+                    if lastKey + i + 1> length:
+                        length = lastKey + i + 1
+                    break
+        return length
+    
+    def __setitem__(self, index, value):
+        pass
+    
+    def __pushWrite(self, index, value):
+        """Write value at index to _writeBuffer"""
+        #debug.debug("__pushWrite", index, value)
+        if ((index // self._blockSize) * self._blockSize in self._writeBuffer.keys()):
+            self._writeBuffer[(index // self._blockSize) * self._blockSize][index - ((index // self._blockSize) * self._blockSize)] = value
+        else:
+            self._writeBuffer[(index // self._blockSize) * self._blockSize] = [None for i in range(0, self._blockSize)]
+            self._writeBuffer[(index // self._blockSize) * self._blockSize][index - ((index // self._blockSize) * self._blockSize)] = value
+    
+    def _cacheMiss(self, offset):
+        """loads a block of the file into memeory"""
+        #Assumes the block being added to the _readBuffer is not already in the _readBuffer
+        closestBlock = (offset // self._blockSize) * self._blockSize
+        if (len(self._readBuffer) >= self._bufferSize):
+            self._cacheEvict(closestBlock)
+        block = []
+        if (closestBlock > self.fileSize):
+            block = [None for i in range(0, self._blockSize)]
+        else:
+            self.file.seek(closestBlock)
+            temp = self.file.read(self._blockSize)
+            for i in range(0, len(temp)):
+                block.append(temp[i])
+            for i in range(len(temp), self._blockSize):
+                block.append(None)
+        self._readBuffer[closestBlock] = block
+        
+    def _cacheEvict(self, current):
+        """Takes the current location of read, evicts block from memory that isn't current
+        
+        Evicts furthest block from current block
+        """
+        closestBlock = (current // self._blockSize) * self._blockSize
+        furthestBlock = closestBlock
+        for i in list(self._readBuffer.keys()):
+            if (abs(closestBlock - i) > abs(closestBlock - furthestBlock)):
+                furthestBlock = i
+        del(self._readBuffer[furthestBlock])
+
+    def close(self):
+        """Closes buffer WITHOUT writing changes to file"""
+        #remember to delete all the buffers
+        del(self._readBuffer)
+        del(self._writeBuffer)
+        self.file.close()
+        
+    def flush(self):
+        """Writes buffer contents to file"""
+        #TODO: if editied file is smaller then original, create a copy to resize
+        for i in sorted(self._writeBuffer.keys()): #goes through _writeBuffer
+            for j in range(0, self._blockSize):
+                if self._writeBuffer[i][j] != None:
+                    self.file.seek(i + j)
+                    self.file.write(self._writeBuffer[i][j].to_bytes(1, sys.byteorder))
+                
+        self.file.flush()
+        self.fileSize = self.file.seek(0, 2) #resets fileSize
+        
+        for i in list(self._readBuffer.keys()):
+            del(self._readBuffer[i])
+        for i in list(self._writeBuffer.keys()):
+            del(self._writeBuffer[i])
+            
+    def refresh(self):
+        """refreshes all buffers without writing/updating file"""
+        self.fileSize = self.file.seek(0, 2) #resets fileSize
+        for i in list(self._readBuffer.keys()):
+            del(self._readBuffer[i])
+        for i in list(self._writeBuffer.keys()):
+            del(self._writeBuffer[i])
+
+class HexBuffer:
+    import os
+    import math
+    
+    def __init__(self, path):
         self.filePath = path
         self.file = open(path, 'r+b') #does not handle exceptions here, so calling function can handle raised exceptions
         self.fileSize = self.file.seek(0,2)
@@ -181,14 +353,6 @@ class Buffer:
         del(self.filePath)
         del(self.file)
         del(self.fileSize)
-        
-    '''
-    def __delitem__(self, index):
-        # currently unsuported until deleting a byte is properly thought out
-        # https://docs.python.org/3/reference/datamodel.html#object.__delitem__
-        self._actionQueue.append((index, None))
-        #TODO: change this to also shift bytes when needed
-    '''
     
     def __getitem__(self, key):
         """returns array of ints and Nones (NOT BYTES)
@@ -197,7 +361,7 @@ class Buffer:
         DO NOT itterate over directly with a 'for' loop, IndexError will not be raised, thus the for loop will NOT terminate
         """
         # https://docs.python.org/3/reference/datamodel.html#object.__getitem__
-        if (isinstance(key, slice)): #it's a slice
+        if (isinstance(key, slice)): #key is a slice
             step = 1
             start = 0
             stop = self.__len__()
@@ -231,7 +395,7 @@ class Buffer:
                     
             return result
         
-        else: #it's a regular int
+        else: #key is an int
             if not (isinstance(5, int)):
                 raise TypeError
             
@@ -649,7 +813,7 @@ Arrow Keys    = Move Curser
 """
 
 api = """A list of accessable variables/functions/etc in this program
-Buffer:
+HexBuffer:
 window:
 
 buffer
@@ -730,7 +894,7 @@ def openfile(path):
     
     tempBuffer = None
     try:
-        tempBuffer = Buffer(path)
+        tempBuffer = HexBuffer(path)
         fileSize = tempBuffer.fileSize #os.path.getsize(path) returns incorrect value when opening a drive (as a block device)
         filePath = path
         print("Successfully opened file: " + path)
