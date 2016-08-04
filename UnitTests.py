@@ -1,32 +1,8 @@
 #!/usr/bin/env python3
-'''A program to help test the various modules of Py3HexEditLite.py, in addition to help develop it'''
+'''A program to help test the various modules of Py3HexEditLite.py'''
 import sys
 import unittest
 import tracemalloc # https://docs.python.org/3/library/tracemalloc.html
-
-env = None
-try:
-    import tty #linux specific operations
-    import termios #linux specific operations
-    env = "UNIX"
-except:
-    pass
-try:
-    import msvcrt #windows specific operations
-    env = "WIN"
-except:
-    pass
-
-def getch():
-    if (env == "WIN"):
-        return msvcrt.getch()
-    if (env == "UNIX"):
-        terminalFD = sys.stdin.fileno()
-        oldSetting = termios.tcgetattr(terminalFD)
-        tty.setraw(sys.stdin.fileno())
-        ch = sys.stdin.read(1)
-        termios.tcsetattr(terminalFD, termios.TCSADRAIN, oldSetting)
-        return ch
 
 class BufferTest(unittest.TestCase):
     # https://docs.python.org/3.5/library/unittest.html#module-unittest  
@@ -38,7 +14,7 @@ class BufferTest(unittest.TestCase):
             for j in range(0,256):
                 fd.write(j.to_bytes(1, sys.byteorder))
         fd.close()        
-        self.buf = py3.Buffer("temp.tmp")
+        self.buf = py3.HexBuffer("temp.tmp")
         
     def tearDown(self):
         """Closes buffer after each test"""
@@ -239,29 +215,17 @@ class BufferTest(unittest.TestCase):
             self.buf[0.0]
 
 if __name__ == "__main__":
-    #To help figure out the keymappings to Windows and Linux
-    if (False):
-        print("input 20 characters")
-        i = 20
-        while(i>0):
-            i -= 1
-            temp = getch()
-            print(str(temp))
-            print(":" + str(ord(temp)))
-            print(str(hex(ord(temp))))
-        
     #unit tests of the various modules in Py3HexEditLite.py
-    if (True):
-        try:
-            import Py3HexEditLite as py3
-        except:
-            print("could not import Py3HexEditLite.py")
-            print("aborting unit tests")
-            exit()
+    try:
+        import Py3HexEditLite as py3
+    except:
+        print("could not import Py3HexEditLite.py")
+        print("aborting unit tests")
+        exit()
 
-        #Unit Tests
-        unittest.main(verbosity=2,exit=False)
-        print("Test Complete")
+    #Unit Tests
+    unittest.main(verbosity=2,exit=False)
+    print("Test Complete")
         
     """Manual testing
     # http://stackoverflow.com/questions/6522644/how-to-open-disks-in-windows-and-read-data-at-low-level
