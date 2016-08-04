@@ -854,7 +854,7 @@ def newfile(path):
         print("ERROR: Could not open file to write to: " + str(i))
         return -1
 
-    openFile(path)
+    openfile(path)
     goto(0)
     return 0
 
@@ -945,7 +945,7 @@ def saveas(path):
     buffer.close()
     buffer = None
     
-    openFile(path)
+    openfile(path)
     return 0
 
 def quit():
@@ -983,12 +983,12 @@ if __name__ == "__main__":
     #TODO: allow passing in more the one argument
     #TODO: document args
     if (len(sys.argv) >= 2):
-        openFile(sys.argv[1])
+        openfile(sys.argv[1])
     else:
         print("program has not been passed an argument, Opening interpriter")
         
     while (buffer == None):
-        print("Please use openFile(\"filePath\") to open a file to edit")
+        print("Please use openfile(\"filePath\") to open a file to edit")
         _command()
     
     #process keyboard input
