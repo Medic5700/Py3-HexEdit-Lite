@@ -6,7 +6,7 @@ import os
 import sys
 import traceback #for error handling in interpriter (IE: COMMAND mode)
 
-version = "v0.5"
+version = "v0.6"
 
 class Debug:
     """Class for logging and debuging"""
@@ -51,7 +51,7 @@ class Debug:
 
 class Keyboard:
     """A small class for handling AND parsing single character keyboard input"""
-    # Keeping this instatiated also keeps this class moduler
+    #NOTE: Keeping this instatiated also keeps this class moduler
     env = None #The detected environment, either "W" for windows, or "L" for linux
     
     #This detects what input method would would work (windows of linux) based on what imports work/fail
@@ -125,7 +125,6 @@ class Keyboard:
         
     def getch(self):
         """parses keyboard input, returns str representing keypress (IE: 'a', '1', 'Ctrl+Z')"""
-        #TODO: decide what the output type should be
         raw = self._getch()
         output = None
         if (ord(raw) in self.escape[self.env]):
@@ -682,7 +681,6 @@ class window:
 #control functions, not inteneded to be directly accesable to the user
 def _command():
     """prompts and execute commands within the current python3 environement"""
-    #TODO: handle keyboard escape (IE: CTRL-C)
     compiledCode = None
     userCode = ""
     line = ""
@@ -831,20 +829,20 @@ quit()
 
 def goto(x):
     """Moves curser to x, adjusts screen location accordingly"""
-    if (not (type(x) == int)):
-        raise TypeError
+    if (type(x) != int):
+        raise TypeError("Expected 'x' to be an int")
     elif (x < 0):
-        raise ValueError
+        raise ValueError("'x' is less then zero, expected 0 >= x")
     
     window.curser = x
     window.screen = int(x // 16) * 16
+    window.halfbyte = False
     return 0
     
 def newfile(path):
     """Creates a new empty file"""
-    global buffer
     if (type(path) != str):
-        raise TypeError
+        raise TypeError("Expected 'path' to be string")
     
     print("Attempting to open file: " + str(path))
     try:
@@ -876,21 +874,14 @@ def openfile(path):
     
     if (os.path.exists(path) == False):
         print("ERROR: path invalid")
-        return -1   
+        return -1
     if os.path.islink(path):
         print("Attemtping to open a sumbolic link")    
     if os.path.isdir(path):
-        #print("Attempting to open a directory")
         print("ERROR: path is a directory")
         return -1
     if (os.path.ismount(path) == True):
         print("Attempting to open a mount point")
-    '''
-    if (os.path.isfile(path) == False): #this does not allow opening a drive (as a block device)
-        #raise IsADirectoryError
-        print("ERROR: Path Not File")
-        return -1
-    '''
     
     tempBuffer = None
     try:
@@ -910,7 +901,6 @@ def openfile(path):
         buffer.close()
         buffer = tempBuffer
     else:
-        #debug.debug("assinging tempbuffer to buffer")
         buffer = tempBuffer
     
     goto(0)
@@ -933,8 +923,9 @@ def saveas(path):
     try:
         file = open(path, "x+b")
     except Exception as i:
-        print("ERROR: Could not open file to write to: " + str(i))
+        print("ERROR: Could not create file to write to: " + str(i))
         return -1
+    
     for i in range(0, len(buffer)):
         if buffer[i] == None:
             file.write((0).to_bytes(1, sys.byteorder))
@@ -955,20 +946,6 @@ def quit():
     print("Py3HexEditLite.py is quiting")
     buffer.close()
     exit(0)
-    
-''' #possible future API
-def find(x):
-    global buffer
-    pass
-
-def hexHelp():
-    """Prints a help dialogue"""
-    pass
-    
-def api():
-    """Prints help dialogue for API the user can use for the command imput"""
-    pass
-'''
 
 if __name__ == "__main__":
     debug = Debug(True)
@@ -980,7 +957,6 @@ if __name__ == "__main__":
     filePath = None
     fileSize = None
     
-    #TODO: allow passing in more the one argument
     #TODO: document args
     if (len(sys.argv) >= 2):
         openfile(sys.argv[1])

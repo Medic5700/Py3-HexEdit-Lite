@@ -4,7 +4,7 @@ import sys
 import unittest
 import tracemalloc # https://docs.python.org/3/library/tracemalloc.html
 
-class BufferTest(unittest.TestCase):
+class HexBufferTest(unittest.TestCase):
     # https://docs.python.org/3.5/library/unittest.html#module-unittest  
     
     def setUp(self):
