@@ -6,7 +6,7 @@ import os
 import sys
 import traceback #for error handling in interpriter (IE: COMMAND mode)
 
-version = "v0.5"
+version = "v0.6"
 
 class Debug:
     """Class for logging and debuging"""
@@ -51,7 +51,7 @@ class Debug:
 
 class Keyboard:
     """A small class for handling AND parsing single character keyboard input"""
-    # Keeping this instatiated also keeps this class moduler
+    #NOTE: Keeping this instatiated also keeps this class moduler
     env = None #The detected environment, either "W" for windows, or "L" for linux
     
     #This detects what input method would would work (windows of linux) based on what imports work/fail
@@ -69,41 +69,57 @@ class Keyboard:
     def __init__(self):
         self.escape = {"L":[0x1B], "W":[0xE0, 0x00]}
         #this looks backwards, but is meant to make it easy to edit these character bindings
-        self.specialKeys = {"CTRL+A"  :{"L":0x01      ,"W":0x01      },
-                            "CTRL+B"  :{"L":0x02      ,"W":0x02      },
-                            "CTRL+C"  :{"L":0x03      ,"W":0x03      },
-                            "CTRL+D"  :{"L":0x04      ,"W":0x04      },
-                            "CTRL+E"  :{"L":0x05      ,"W":0x05      },
-                            "CTRL+F"  :{"L":0x06      ,"W":0x06      },
-                            "CTRL+G"  :{"L":0x07      ,"W":0x07      },
-                            "CTRL+H"  :{"L":0x08      ,"W":0x08      },
-                            #"CTRL+I"  :{"L":0x09      ,"W":0x09      }, #Same as \t
-                            #"CTRL+J"  :{"L":0x0A      ,"W":0x0A      }, #same as \n
-                            "CTRL+K"  :{"L":0x0B      ,"W":0x0B      },
-                            "CTRL+L"  :{"L":0x0C      ,"W":0x0C      },
-                            #"CTRL+M"  :{"L":0x0D      ,"W":0x0D      }, #This is the same as ENTER
-                            "CTRL+N"  :{"L":0x0E      ,"W":0x0E      },
-                            "CTRL+O"  :{"L":0x0F      ,"W":0x0F      },
-                            "CTRL+P"  :{"L":0x10      ,"W":0x10      },
-                            "CTRL+Q"  :{"L":0x11      ,"W":0x11      },
-                            "CTRL+R"  :{"L":0x12      ,"W":0x12      },
-                            "CTRL+S"  :{"L":0x13      ,"W":0x13      },
-                            "CTRL+T"  :{"L":0x14      ,"W":0x14      },
-                            "CTRL+U"  :{"L":0x15      ,"W":0x15      },
-                            "CTRL+V"  :{"L":0x16      ,"W":0x16      },
-                            "CTRL+W"  :{"L":0x17      ,"W":0x17      },
-                            "CTRL+X"  :{"L":0x18      ,"W":0x18      },
-                            "CTRL+Y"  :{"L":0x19      ,"W":0x19      },
-                            "CTRL+Z"  :{"L":0x1A      ,"W":0x1A      },
-                            "ENTER"   :{"L":0x0D      ,"W":0x0D      }, #This is the same as CTRL+M
-                            "UP"      :{"L":0x1B5B41  ,"W":0xE048    },
-                            "DOWN"    :{"L":0x1B5B42  ,"W":0xE050    },
-                            "LEFT"    :{"L":0x1B5B44  ,"W":0xE04B    },
-                            "RIGHT"   :{"L":0x1B5B43  ,"W":0xE04D    },
-                            #"ESC"     :{"L":0x1B      ,"W":0x1B      } #problimatic since 0x1B is the linux escape character (I think?)
-                            "DEL"     :{"L":0x1B5B33  ,"W":0xE053    }, #"L" 0x1B5B337E
-                            "PAGEUP"  :{"L":0x1B5B35  ,"W":0xE049    }, #"L" 0x1B5B357E
-                            "PAGEDOWN":{"L":0x1B5B36  ,"W":0xE051    }  #"L" 0x1B5B367E
+        self.specialKeys = {"CTRL+A"   :{"L":0x01      ,"W":0x01      },
+                            "CTRL+B"   :{"L":0x02      ,"W":0x02      },
+                            "CTRL+C"   :{"L":0x03      ,"W":0x03      },
+                            "CTRL+D"   :{"L":0x04      ,"W":0x04      },
+                            "CTRL+E"   :{"L":0x05      ,"W":0x05      },
+                            "CTRL+F"   :{"L":0x06      ,"W":0x06      },
+                            "CTRL+G"   :{"L":0x07      ,"W":0x07      },
+                            #"CTRL+H"   :{"L":0x08      ,"W":0x08      }, #Same as BACKSPACE
+                            #"CTRL+I"   :{"L":0x09      ,"W":0x09      }, #Same as \t
+                            #"CTRL+J"   :{"L":0x0A      ,"W":0x0A      }, #same as \n
+                            "CTRL+K"   :{"L":0x0B      ,"W":0x0B      },
+                            "CTRL+L"   :{"L":0x0C      ,"W":0x0C      },
+                            #"CTRL+M"   :{"L":0x0D      ,"W":0x0D      }, #This is the same as ENTER
+                            "CTRL+N"   :{"L":0x0E      ,"W":0x0E      },
+                            "CTRL+O"   :{"L":0x0F      ,"W":0x0F      },
+                            "CTRL+P"   :{"L":0x10      ,"W":0x10      },
+                            "CTRL+Q"   :{"L":0x11      ,"W":0x11      },
+                            "CTRL+R"   :{"L":0x12      ,"W":0x12      },
+                            "CTRL+S"   :{"L":0x13      ,"W":0x13      },
+                            "CTRL+T"   :{"L":0x14      ,"W":0x14      },
+                            "CTRL+U"   :{"L":0x15      ,"W":0x15      },
+                            "CTRL+V"   :{"L":0x16      ,"W":0x16      },
+                            "CTRL+W"   :{"L":0x17      ,"W":0x17      },
+                            "CTRL+X"   :{"L":0x18      ,"W":0x18      },
+                            "CTRL+Y"   :{"L":0x19      ,"W":0x19      },
+                            "CTRL+Z"   :{"L":0x1A      ,"W":0x1A      },
+                            "ENTER"    :{"L":0x0D      ,"W":0x0D      }, #This is the same as CTRL+M
+                            "UP"       :{"L":0x1B5B41  ,"W":0xE048    },
+                            "DOWN"     :{"L":0x1B5B42  ,"W":0xE050    },
+                            "LEFT"     :{"L":0x1B5B44  ,"W":0xE04B    },
+                            "RIGHT"    :{"L":0x1B5B43  ,"W":0xE04D    },
+                            #"ESC"      :{"L":0x1B      ,"W":0x1B      } #problimatic since 0x1B is the linux escape character (I think?)
+                            "DEL"      :{"L":0x1B5B33  ,"W":0xE053    }, #"L":0x1B5B337E
+                            "PAGEUP"   :{"L":0x1B5B35  ,"W":0xE049    }, #"L":0x1B5B357E
+                            "PAGEDOWN" :{"L":0x1B5B36  ,"W":0xE051    },  #"L":0x1B5B367E
+                            "INSERT"   :{"L":0x1B5B32  ,"W":0xE052    }, #"L":0x1B5B327E
+                            "HOME"     :{"L":0x1B5B48  ,"W":0xE047    },
+                            "END"      :{"L":0x1B5B46  ,"W":0xE04F    },
+                            "BACKSPACE":{"L":0x7F      ,"W":0x08      }, #Same as CTRL+H
+                            #"F1"       :{"L": None     ,"W":0x003B    }, #F1 captured by ubuntu terminal
+                            "F2"       :{"L":0x1B4F51  ,"W":0x003C    },
+                            "F3"       :{"L":0x1B4F52  ,"W":0x003D    },
+                            "F4"       :{"L":0x1B4F53  ,"W":0x003E    }
+                            #"F5"       :{"L":0x1B5B31357E,"W":0x003F},
+                            #"F6"       :{"L":0x1B5B31377E,"W":0x0040},
+                            #"F7"       :{"L":0x1B5B31387E,"W":0x0041},
+                            #"F8"       :{"L":0x1B5B31397E,"W":0x0042},
+                            #"F9"       :{"L":0x1B5B32307E,"W":0x0043},
+                            #"F10"      :{"L":0x1B5B32317E,"W":0x0044},
+                            #"F11"      :{"L": None    ,"W":0xE085}, #F11 captured by ubuntu terminal
+                            #"F12"      :{"L":0x1B5B32347E,"W":0xE086}
                             }
 
     def _getch(self):
@@ -125,7 +141,6 @@ class Keyboard:
         
     def getch(self):
         """parses keyboard input, returns str representing keypress (IE: 'a', '1', 'Ctrl+Z')"""
-        #TODO: decide what the output type should be
         raw = self._getch()
         output = None
         if (ord(raw) in self.escape[self.env]):
@@ -147,11 +162,183 @@ class Keyboard:
                     return i
         return raw
 
-class Buffer:
+class FileBuffer:
     import os
     import math
     
-    def __init__(self, path): #TODO: implement ability to open file in readonly mode
+    def __init__(self, path):
+        self.filePath = path
+        self.file = open(path, 'r+b') #does not handle exceptions here, so calling function can handle raised exceptions
+        self.fileSize = self.file.seek(0,2)
+        
+        self._readBuffer = {} #contains blocks of data from the open file, stored as {Offset:[array of int 0<=x<=255 or None]}
+        self._writeBuffer = {} #contains blocks of data to be writen to file, stored as {Offset:[array of int 0<=x<=255 or None]}
+        self._blockSize = 4096 #Size the data block loaded from files
+        self._bufferSize = 8 #maximum number of read blocks to hold in memory
+        
+    def __del__(self):
+        """Deconstructor, deletes variables in current instance of buffer"""
+        # https://docs.python.org/3/reference/datamodel.html#object.__del__
+        del(self._readBuffer)
+        del(self._writeBuffer)
+        self.file.close()
+        
+        del(self._blockSize)
+        del(self._bufferSize)
+        
+        del(self.filePath)
+        del(self.file)
+        del(self.fileSize)
+        
+    '''
+    def __delitem__(self, index):
+        # currently unsuported until deleting a byte is properly thought out
+        # https://docs.python.org/3/reference/datamodel.html#object.__delitem__
+        self._actionQueue.append((index, None))
+        #TODO: change this to also shift bytes when needed
+    ''' 
+    
+    def __getitem__(self, key):
+        """returns array of ints and Nones (NOT BYTES)
+        
+        will return array of ints, or None in cases where beyond EOF
+        DO NOT itterate over directly with a 'for' loop, IndexError will not be raised, thus the for loop will NOT terminate
+        """
+        # https://docs.python.org/3/reference/datamodel.html#object.__getitem__
+        if (isinstance(key, slice)): #key is a slice
+            step = 1
+            start = 0
+            stop = self.__len__()
+            if (key.step != None):
+                step = key.step
+            if (key.start != None):
+                start = key.start
+            if (key.stop != None):
+                stop = key.stop
+                
+            i = start
+            result = []
+            #TODO: improve effiency
+            while (i < stop): #Goes through _readBuffer
+                if not ((i // self._blockSize) * self._blockSize in self._readBuffer.keys()):
+                    self._cacheMiss(i)
+                result.append(self._readBuffer[(i // self._blockSize) * self._blockSize][i - (i // self._blockSize) * self._blockSize])
+                i += step
+
+            i = start
+            #TODO: improve effiency
+            while (i < stop): #Goes through _writeBuffer
+                if (i // self._blockSize) * self._blockSize in self._writeBuffer.keys():
+                    if self._writeBuffer[(i // self._blockSize) * self._blockSize][i - (i // self._blockSize) * self._blockSize] != None:
+                        result[i - start] = self._writeBuffer[(i // self._blockSize) * self._blockSize][i - (i // self._blockSize) * self._blockSize]
+                i += step
+                    
+            return result
+        
+        else: #key is an int
+            if not (isinstance(5, int)):
+                raise TypeError
+            
+            if not ((key // self._blockSize) * self._blockSize in self._readBuffer.keys()):
+                self._cacheMiss(key)
+            result = self._readBuffer[(key // self._blockSize) * self._blockSize][key - (key // self._blockSize) * self._blockSize]
+            if (key // self._blockSize) * self._blockSize in self._writeBuffer.keys():
+                if self._writeBuffer[(key // self._blockSize) * self._blockSize][key - (key // self._blockSize) * self._blockSize] != None:
+                    result = self._writeBuffer[(key // self._blockSize) * self._blockSize][key - (key // self._blockSize) * self._blockSize]
+            return result
+
+    def __len__(self):
+        """Returns length equal to the last last byte available/altered"""
+        # https://docs.python.org/3/reference/datamodel.html#object.__len__
+        length = self.fileSize
+        if len(self._writeBuffer) != 0:
+            lastKey = sorted(self._writeBuffer.keys())[-1]
+            for i in range(self._blockSize - 1, -1, -1):
+                if self._writeBuffer[lastKey][i] != None:
+                    if lastKey + i + 1> length:
+                        length = lastKey + i + 1
+                    break
+        return length
+    
+    def __setitem__(self, index, value):
+        pass
+    
+    def __pushWrite(self, index, value):
+        """Write value at index to _writeBuffer"""
+        #debug.debug("__pushWrite", index, value)
+        if ((index // self._blockSize) * self._blockSize in self._writeBuffer.keys()):
+            self._writeBuffer[(index // self._blockSize) * self._blockSize][index - ((index // self._blockSize) * self._blockSize)] = value
+        else:
+            self._writeBuffer[(index // self._blockSize) * self._blockSize] = [None for i in range(0, self._blockSize)]
+            self._writeBuffer[(index // self._blockSize) * self._blockSize][index - ((index // self._blockSize) * self._blockSize)] = value
+    
+    def _cacheMiss(self, offset):
+        """loads a block of the file into memeory"""
+        #Assumes the block being added to the _readBuffer is not already in the _readBuffer
+        closestBlock = (offset // self._blockSize) * self._blockSize
+        if (len(self._readBuffer) >= self._bufferSize):
+            self._cacheEvict(closestBlock)
+        block = []
+        if (closestBlock > self.fileSize):
+            block = [None for i in range(0, self._blockSize)]
+        else:
+            self.file.seek(closestBlock)
+            temp = self.file.read(self._blockSize)
+            for i in range(0, len(temp)):
+                block.append(temp[i])
+            for i in range(len(temp), self._blockSize):
+                block.append(None)
+        self._readBuffer[closestBlock] = block
+        
+    def _cacheEvict(self, current):
+        """Takes the current location of read, evicts block from memory that isn't current
+        
+        Evicts furthest block from current block
+        """
+        closestBlock = (current // self._blockSize) * self._blockSize
+        furthestBlock = closestBlock
+        for i in list(self._readBuffer.keys()):
+            if (abs(closestBlock - i) > abs(closestBlock - furthestBlock)):
+                furthestBlock = i
+        del(self._readBuffer[furthestBlock])
+
+    def close(self):
+        """Closes buffer WITHOUT writing changes to file"""
+        #remember to delete all the buffers
+        del(self._readBuffer)
+        del(self._writeBuffer)
+        self.file.close()
+        
+    def flush(self):
+        """Writes buffer contents to file"""
+        #TODO: if editied file is smaller then original, create a copy to resize
+        for i in sorted(self._writeBuffer.keys()): #goes through _writeBuffer
+            for j in range(0, self._blockSize):
+                if self._writeBuffer[i][j] != None:
+                    self.file.seek(i + j)
+                    self.file.write(self._writeBuffer[i][j].to_bytes(1, sys.byteorder))
+                
+        self.file.flush()
+        self.fileSize = self.file.seek(0, 2) #resets fileSize
+        
+        for i in list(self._readBuffer.keys()):
+            del(self._readBuffer[i])
+        for i in list(self._writeBuffer.keys()):
+            del(self._writeBuffer[i])
+            
+    def refresh(self):
+        """refreshes all buffers without writing/updating file"""
+        self.fileSize = self.file.seek(0, 2) #resets fileSize
+        for i in list(self._readBuffer.keys()):
+            del(self._readBuffer[i])
+        for i in list(self._writeBuffer.keys()):
+            del(self._writeBuffer[i])
+
+class HexBuffer:
+    import os
+    import math
+    
+    def __init__(self, path):
         self.filePath = path
         self.file = open(path, 'r+b') #does not handle exceptions here, so calling function can handle raised exceptions
         self.fileSize = self.file.seek(0,2)
@@ -181,14 +368,6 @@ class Buffer:
         del(self.filePath)
         del(self.file)
         del(self.fileSize)
-        
-    '''
-    def __delitem__(self, index):
-        # currently unsuported until deleting a byte is properly thought out
-        # https://docs.python.org/3/reference/datamodel.html#object.__delitem__
-        self._actionQueue.append((index, None))
-        #TODO: change this to also shift bytes when needed
-    '''
     
     def __getitem__(self, key):
         """returns array of ints and Nones (NOT BYTES)
@@ -197,7 +376,7 @@ class Buffer:
         DO NOT itterate over directly with a 'for' loop, IndexError will not be raised, thus the for loop will NOT terminate
         """
         # https://docs.python.org/3/reference/datamodel.html#object.__getitem__
-        if (isinstance(key, slice)): #it's a slice
+        if (isinstance(key, slice)): #key is a slice
             step = 1
             start = 0
             stop = self.__len__()
@@ -231,7 +410,7 @@ class Buffer:
                     
             return result
         
-        else: #it's a regular int
+        else: #key is an int
             if not (isinstance(5, int)):
                 raise TypeError
             
@@ -396,17 +575,36 @@ class window:
     #keep to 39 characters in window width, in case displaying on different sized console windows
     
     def _sanityCheck():
-        """Returns true if variables have sane/acceptable values"""
-        pass
-    
+        """varifies if variables have sane/acceptable values, raises appropriate errors"""
+        if not isinstance(window.curser, int):
+            raise TypeError("window.curser not int")
+        if window.curser < 0:
+            raise ValueError("window.curser not > 0")
+        if not isinstance(window.screen, int):
+            raise TypeError("window.screen not int")
+        if window.screen < 0:
+            raise ValueError("window.screen not > 0")
+        if (window.screen % 16 != 0):
+            raise ValueError("window.screen not multiple of 16")
+        if not isinstance(window.halfbyte, bool):
+            raise TypeError("window.halfbyte not bool")
+        if buffer == None: 
+            raise TypeError("buffer not initialized or missing") #TODO: is this the right error to raise
+        if abs(window.screen - window.curser) > 256: #auto-sets screen to curser if curser is out of screen range
+            window.screen = (window.curser // 16) * 16
+        
     def interface():
         """Prints the interface window"""
-        
-        text = ""
-        text += window.header()
-        text += window.body()
-        text += window.footer()
-        print(text, end="")
+        try:
+            window._sanityCheck()
+            text = ""
+            text += window.header()
+            text += window.body()
+            text += window.footer()
+            print(text, end="")
+        except Exception as i:
+            print("ERROR: Unable to print interface")
+            traceback.print_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2])
     
     def _header():
         """Returns String representing the first 4 lines of interface window, newline terminated"""
@@ -499,13 +697,17 @@ class window:
 #control functions, not inteneded to be directly accesable to the user
 def _command():
     """prompts and execute commands within the current python3 environement"""
-    #TODO: handle keyboard escape (IE: CTRL-C)
     compiledCode = None
     userCode = ""
     line = ""
     
     while True:
-        line = input(">>>") #get first line in a multiline codeblock
+        try:
+            line = input(">>>") #get first line in a multiline codeblock
+        except KeyboardInterrupt:
+            traceback.print_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2])
+            break
+            
         if line == "":
             break
         userCode += line
@@ -514,11 +716,21 @@ def _command():
             compiledCode = code.compile_command(userCode) #if first line compiles, the codeblock was a one liner, skip to executing it
             while compiledCode == None: #get lines until codeblock compiles, syntax error is raised, or "" is entered
                 line = input("...")
+                '''
+                try:
+                    line = input("...")
+                except Exception:
+                    traceback.print_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2])
+                    line = ""
+                '''
                 if line == "":
                     userCode += "\n"
                 else:
                     userCode += line
                 compiledCode = code.compile_command(userCode)
+        except KeyboardInterrupt:
+            traceback.print_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2])
+            break
         except Exception:
             compiledCode = None
             userCode = ""
@@ -538,11 +750,12 @@ def _command():
                 userCode = ""
                 line = ""
     
-def _down():
+def _down(x = 16):
     """Move curser down, sets curser Location, adjusts screen location as needed"""
-    if (((window.curser + 16)// 16) * 16 - window.screen) >= 256:
-        window.screen = window.screen + 16
-    window.curser = window.curser + 16
+    move = (x // 16) * 16
+    if (((window.curser + move)// 16) * 16 - window.screen) >= 256:
+        window.screen = window.screen + move
+    window.curser = window.curser + move
     
 def _left():
     """Move curser left, sets curser Location, adjusts screen location as needed"""
@@ -582,12 +795,13 @@ def _right():
     window.halfbyte = not window.halfbyte
     
 
-def _up():
+def _up(x = 16):
     """Move curser up, sets curser Location, adjusts screen location as needed"""
-    if (window.screen > window.curser - 16):
-        window.screen = max(0, window.screen - 16)
-    if (window.curser >= 16):
-        window.curser = window.curser - 16
+    move = (x // 16) * 16
+    if (window.screen > window.curser - move):
+        window.screen = max(0, window.screen - move)
+    if (window.curser >= move):
+        window.curser = window.curser - move
     
 def _write(halfbyte):
     """Write a single half-byte to the current curser Location, use only when in HEX mode"""
@@ -613,7 +827,7 @@ Arrow Keys    = Move Curser
 """
 
 api = """A list of accessable variables/functions/etc in this program
-Buffer:
+HexBuffer:
 window:
 
 buffer
@@ -631,20 +845,20 @@ quit()
 
 def goto(x):
     """Moves curser to x, adjusts screen location accordingly"""
-    if (not (type(x) == int)):
-        raise TypeError
+    if (type(x) != int):
+        raise TypeError("Expected 'x' to be an int")
     elif (x < 0):
-        raise ValueError
+        raise ValueError("'x' is less then zero, expected 0 >= x")
     
     window.curser = x
     window.screen = int(x // 16) * 16
+    window.halfbyte = False
     return 0
     
 def newfile(path):
     """Creates a new empty file"""
-    global buffer
     if (type(path) != str):
-        raise TypeError
+        raise TypeError("Expected 'path' to be string")
     
     print("Attempting to open file: " + str(path))
     try:
@@ -654,7 +868,7 @@ def newfile(path):
         print("ERROR: Could not open file to write to: " + str(i))
         return -1
 
-    openFile(path)
+    openfile(path)
     goto(0)
     return 0
 
@@ -676,25 +890,18 @@ def openfile(path):
     
     if (os.path.exists(path) == False):
         print("ERROR: path invalid")
-        return -1   
+        return -1
     if os.path.islink(path):
         print("Attemtping to open a sumbolic link")    
     if os.path.isdir(path):
-        #print("Attempting to open a directory")
         print("ERROR: path is a directory")
         return -1
     if (os.path.ismount(path) == True):
         print("Attempting to open a mount point")
-    '''
-    if (os.path.isfile(path) == False): #this does not allow opening a drive (as a block device)
-        #raise IsADirectoryError
-        print("ERROR: Path Not File")
-        return -1
-    '''
     
     tempBuffer = None
     try:
-        tempBuffer = Buffer(path)
+        tempBuffer = HexBuffer(path)
         fileSize = tempBuffer.fileSize #os.path.getsize(path) returns incorrect value when opening a drive (as a block device)
         filePath = path
         print("Successfully opened file: " + path)
@@ -710,7 +917,6 @@ def openfile(path):
         buffer.close()
         buffer = tempBuffer
     else:
-        #debug.debug("assinging tempbuffer to buffer")
         buffer = tempBuffer
     
     goto(0)
@@ -733,8 +939,9 @@ def saveas(path):
     try:
         file = open(path, "x+b")
     except Exception as i:
-        print("ERROR: Could not open file to write to: " + str(i))
+        print("ERROR: Could not create file to write to: " + str(i))
         return -1
+    
     for i in range(0, len(buffer)):
         if buffer[i] == None:
             file.write((0).to_bytes(1, sys.byteorder))
@@ -745,7 +952,7 @@ def saveas(path):
     buffer.close()
     buffer = None
     
-    openFile(path)
+    openfile(path)
     return 0
 
 def quit():
@@ -755,20 +962,6 @@ def quit():
     print("Py3HexEditLite.py is quiting")
     buffer.close()
     exit(0)
-    
-''' #possible future API
-def find(x):
-    global buffer
-    pass
-
-def hexHelp():
-    """Prints a help dialogue"""
-    pass
-    
-def api():
-    """Prints help dialogue for API the user can use for the command imput"""
-    pass
-'''
 
 if __name__ == "__main__":
     debug = Debug(True)
@@ -780,15 +973,14 @@ if __name__ == "__main__":
     filePath = None
     fileSize = None
     
-    #TODO: allow passing in more the one argument
     #TODO: document args
     if (len(sys.argv) >= 2):
-        openFile(sys.argv[1])
+        openfile(sys.argv[1])
     else:
         print("program has not been passed an argument, Opening interpriter")
         
     while (buffer == None):
-        print("Please use openFile(\"filePath\") to open a file to edit")
+        print("Please use openfile(\"filePath\") to open a file to edit")
         _command()
     
     #process keyboard input
@@ -807,11 +999,10 @@ if __name__ == "__main__":
             _right()
         elif (raw == "ENTER"):
             _command()
-            '''
-            elif (raw == "DEL"):
-                buffer[int(math.floor(window.curser))] = None
-                #_write(window.curser, None)
-            '''
+        elif (raw == "PAGEUP"):
+            _up(256)
+        elif (raw == "PAGEDOWN"):
+            _down(256)
         elif (raw == "CTRL+S"):
             save()
         elif (raw == "CTRL+Q"):
