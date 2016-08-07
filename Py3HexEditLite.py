@@ -955,14 +955,6 @@ def saveas(path):
     openfile(path)
     return 0
 
-def quit():
-    """Closes the current session"""
-    global buffer
-    
-    print("Py3HexEditLite.py is quiting")
-    buffer.close()
-    exit(0)
-
 if __name__ == "__main__":
     debug = Debug(True)
     print("Starting Py3HexEditLite.py")
