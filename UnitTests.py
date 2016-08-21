@@ -9,12 +9,12 @@ class HexBufferTest(unittest.TestCase):
     
     def setUp(self):
         """This resets the file and loads buffer for each test"""
-        fd = open("temp.tmp","wb")
+        fd = open("tests/temp.tmp", "w+b")
         for i in range(0,256):
             for j in range(0,256):
                 fd.write(j.to_bytes(1, sys.byteorder))
         fd.close()        
-        self.buf = py3.HexBuffer("temp.tmp")
+        self.buf = py3.HexBuffer("tests/temp.tmp")
         
     def tearDown(self):
         """Closes buffer after each test"""
@@ -22,7 +22,7 @@ class HexBufferTest(unittest.TestCase):
         
     def testFileStats(self):
         """Tests that buffer gets the stats of the file correct"""
-        self.assertEqual(self.buf.filePath, "temp.tmp")
+        self.assertEqual(self.buf.filePath, "tests/temp.tmp")
         self.assertEqual(self.buf.fileSize, 256*256)
         
     def testFileReadWrite(self):
