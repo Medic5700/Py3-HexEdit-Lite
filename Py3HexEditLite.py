@@ -450,6 +450,11 @@ class HexBuffer:
             raise TypeError
         if (value < 0) or (value > 255):
             raise ValueError
+        
+        #reset redoStack
+        if len(self._redoStack) != 0:
+            del(self._redoStack[:])
+        
         if len(self._actionQueue) >= self._undoSize:
             poppedAction = self._actionQueue.pop(0)
             self.__pushWrite(poppedAction[0], poppedAction[1])
@@ -498,11 +503,13 @@ class HexBuffer:
         
     def undo(self):
         """removes last action from action queue (appends to redo stack)"""
-        pass
+        if len(self._actionQueue) != 0:
+            self._redoStack.append(self._actionQueue.pop())
     
     def redo(self):
         """Appends action from redo stack to action queue"""
-        pass
+        if len(self._redoStack) != 0:
+            self._actionQueue.append(self._redoStack.pop())
     
     def status(self):
         """returns string representing how 'full' the various buffers are"""
@@ -998,7 +1005,11 @@ if __name__ == "__main__":
         elif (raw == "CTRL+S"):
             save()
         elif (raw == "CTRL+Q"):
-            quit()        
+            quit()
+        elif (raw == "CTRL+Y"):
+            buffer.redo()
+        elif (raw == "CTRL+Z"):
+            buffer.undo()
         elif (len(raw) == 1): #single character input
             if (mode == "HEX") and ((chr(ord(raw)) in "1234567890abcdefABCDEF")):
                 _write(raw)

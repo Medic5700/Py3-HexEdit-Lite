@@ -11,6 +11,8 @@ Controls:
     Arrow keys   - move curser
     CTRL+Q       - quit program
     CTRL+S       - save
+    CTRL+Z       - undo
+    CTRL+Y       - redo
     TAB          - switch between editing in HEX mode and TEXT mode
     A hex number - write a byte at curser location
     ENTER        - enter python command(s)
