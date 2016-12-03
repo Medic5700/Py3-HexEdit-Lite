@@ -962,6 +962,20 @@ def saveas(path):
     openfile(path)
     return 0
 
+class clipboard:
+    copyBuffer = None
+    def copy(start, length):
+        clipboard.copyBuffer = buffer[start: start + length]
+    def paste(start):
+        for i in range(len(clipboard.copyBuffer)):
+            buffer[start + i] = clipboard.copyBuffer[i]
+            
+def copy(x):
+    clipboard.copy(window.curser,x)
+    
+def paste():
+    clipboard.paste(window.curser)
+
 if __name__ == "__main__":
     debug = Debug(True)
     print("Starting Py3HexEditLite.py")
