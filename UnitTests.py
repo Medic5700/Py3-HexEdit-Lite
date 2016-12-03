@@ -153,6 +153,7 @@ class HexBufferTest(unittest.TestCase):
         self.assertEqual(self.buf.mask(256*256+1024), False)
         
     def testBlockEviction(self):
+        """Tests that readbuffer block eviction is working as intended"""
         assert self.buf._blockSize == 4096
         
         self.buf.refresh()
@@ -196,6 +197,7 @@ class HexBufferTest(unittest.TestCase):
                 self.assertEqual(sorted(self.buf._readBuffer.keys()), [i*4096 for i in range(0+j, 8+j)])        
         
     def testRaisedError(self):
+        """Tests that appropriate errors are raised"""
         with self.assertRaises(ValueError):
             self.buf[0] = -1
             self.buf[0] = 256

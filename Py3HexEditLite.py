@@ -10,7 +10,7 @@ version = "v0.6"
 
 class Debug:
     """Class for logging and debuging"""
-    def __init__(self, debugMode, file="Py3HexEditLite.log"):
+    def __init__(self, debugMode, file="Log.log"):
         self.__filename = file
         self.showDebug = debugMode #Bool
         
@@ -54,10 +54,10 @@ class Keyboard:
     #NOTE: Keeping this instatiated also keeps this class moduler
     env = None #The detected environment, either "W" for windows, or "L" for linux
     
-    #This detects what input method would would work (windows of linux) based on what imports work/fail
+    #This detects what input method would would work (windows or linux) based on what imports work/fail
     try:
         #Windows
-        import msvcrt #windows specific operations
+        import msvcrt #windows specific operation
         env = "W"
     except:
         #Unix
@@ -100,6 +100,10 @@ class Keyboard:
                             "DOWN"     :{"L":0x1B5B42    ,"W":0xE050    },
                             "LEFT"     :{"L":0x1B5B44    ,"W":0xE04B    },
                             "RIGHT"    :{"L":0x1B5B43    ,"W":0xE04D    },
+                            #"CTRL+UP"  :{"L":0x1B5B313B3541,"W":0xE08D    }, #TOO LONG
+                            #"CTRL+DOWN":{"L":0x1B5B313B3542,"W":0xE091    }, #TOO LONG
+                            #"CTRL+LEFT":{"L":0x1B5B313B3544,"W":0xE073    }, #TOO LONG
+                            #"CTRL+RIGHT":{"L":0x1B5B313B5343,"W":0xE074    }, #TOO LONG                            
                             #"ESC"      :{"L":0x1B        ,"W":0x1B      } #problimatic since 0x1B is the linux escape character (I think?)
                             "DEL"      :{"L":0x1B5B33    ,"W":0xE053    }, #"L":0x1B5B337E
                             "PAGEUP"   :{"L":0x1B5B35    ,"W":0xE049    }, #"L":0x1B5B357E
@@ -112,14 +116,14 @@ class Keyboard:
                             "F2"       :{"L":0x1B4F51    ,"W":0x003C    },
                             "F3"       :{"L":0x1B4F52    ,"W":0x003D    },
                             "F4"       :{"L":0x1B4F53    ,"W":0x003E    }
-                            #"F5"       :{"L":0x1B5B31357E,"W":0x003F    },
-                            #"F6"       :{"L":0x1B5B31377E,"W":0x0040    },
-                            #"F7"       :{"L":0x1B5B31387E,"W":0x0041    },
-                            #"F8"       :{"L":0x1B5B31397E,"W":0x0042    },
-                            #"F9"       :{"L":0x1B5B32307E,"W":0x0043    },
-                            #"F10"      :{"L":0x1B5B32317E,"W":0x0044    },
+                            #"F5"       :{"L":0x1B5B31357E,"W":0x003F    }, #TOO LONG
+                            #"F6"       :{"L":0x1B5B31377E,"W":0x0040    }, #TOO LONG
+                            #"F7"       :{"L":0x1B5B31387E,"W":0x0041    }, #TOO LONG
+                            #"F8"       :{"L":0x1B5B31397E,"W":0x0042    }, #TOO LONG
+                            #"F9"       :{"L":0x1B5B32307E,"W":0x0043    }, #TOO LONG
+                            #"F10"      :{"L":0x1B5B32317E,"W":0x0044    }, #TOO LONG
                             #"F11"      :{"L": None    ,"W":0xE085    }, #F11 captured by ubuntu terminal
-                            #"F12"      :{"L":0x1B5B32347E,"W":0xE086    }
+                            #"F12"      :{"L":0x1B5B32347E,"W":0xE086    } #TOO LONG
                             }
 
     def _getch(self):
@@ -977,7 +981,7 @@ def paste():
     clipboard.paste(window.curser)
 
 if __name__ == "__main__":
-    debug = Debug(True)
+    debug = Debug(True, "Py3HexEditLite.log")
     print("Starting Py3HexEditLite.py")
     
     #globals

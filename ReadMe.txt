@@ -32,7 +32,8 @@ Features:
 Dependencies:
     Python3.5 (built in python 3.5.2)
     
-Interface: This is what the interface looks like:
+Interface: 
+This is what the interface looks like
 
 Py3HexEditLite v0.5    File:ReadMe.txt
 Buffers:  Read:0   Write:0    Undo:0

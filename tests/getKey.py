@@ -33,3 +33,4 @@ if __name__ == "__main__":
         print(str(temp))
         print(":" + str(ord(temp)))
         print(str(hex(ord(temp))))
+        print("")
