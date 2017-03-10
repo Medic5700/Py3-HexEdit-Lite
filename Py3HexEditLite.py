@@ -122,7 +122,7 @@ class Keyboard:
                             #"F8"       :{"L":0x1B5B31397E,"W":0x0042    }, #TOO LONG
                             #"F9"       :{"L":0x1B5B32307E,"W":0x0043    }, #TOO LONG
                             #"F10"      :{"L":0x1B5B32317E,"W":0x0044    }, #TOO LONG
-                            #"F11"      :{"L": None    ,"W":0xE085    }, #F11 captured by ubuntu terminal
+                            #"F11"      :{"L": None       ,"W":0xE085    }, #F11 captured by ubuntu terminal
                             #"F12"      :{"L":0x1B5B32347E,"W":0xE086    } #TOO LONG
                             }
 
@@ -583,7 +583,7 @@ class HexBuffer:
 class window:
     """Handles printing and formating the interface"""
     #initilization code at end of class definition
-    #keep to 39 characters in window width, in case displaying on different sized console windows
+    #keep window to 39 characters in window width, in case displaying on different sized console windows
     
     def _sanityCheck():
         """varifies if variables have sane/acceptable values, raises appropriate errors"""
@@ -838,20 +838,23 @@ Arrow Keys    = Move Curser
 """
 
 api = """A list of accessable variables/functions/etc in this program
-HexBuffer:
-window:
+Classes:
+    HexBuffer:
+    window:
 
-buffer
+Globals:
+    buffer
 
 readme
 api
 
-goto(x)
-newfile(path)
-openfile(path)
-save()
-saveas(path)
-quit()
+UI:
+    goto(x)
+    newfile(path)
+    openfile(path)
+    save()
+    saveas(path)
+    quit()
 """
 
 def goto(x):
@@ -981,6 +984,7 @@ def paste():
     clipboard.paste(window.curser)
 
 if __name__ == "__main__":
+    #Start Initialization
     debug = Debug(True, "Py3HexEditLite.log")
     print("Starting Py3HexEditLite.py")
     
@@ -990,18 +994,19 @@ if __name__ == "__main__":
     filePath = None
     fileSize = None
     
+    keyboard = Keyboard()
+    
     #TODO: document args
     if (len(sys.argv) >= 2):
         openfile(sys.argv[1])
     else:
-        print("program has not been passed an argument, Opening interpriter")
+        print("program has not been passed an argument, opening interpriter")
         
     while (buffer == None):
-        print("Please use openfile(\"filePath\") to open a file to edit")
+        print("Please use openfile(\"filePath\") to open a file to edit (file buffer not initialized)")
         _command()
     
     #process keyboard input
-    keyboard = Keyboard()
     window.interface()
     while (True):
         raw = keyboard.getch()

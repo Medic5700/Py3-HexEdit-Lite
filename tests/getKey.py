@@ -1,3 +1,5 @@
+'''This is mainly used to help figure out the key mappings for Windows and Linux keyboards'''
+
 env = None
 try:
     import tty #linux specific operations
