@@ -1,3 +1,5 @@
+'''This is used to test the Keyboard class during development.'''
+
 class Keyboard:
     """A small class for handling AND parsing single character keyboard input"""
     #NOTE: Keeping this instatiated also keeps this class moduler
@@ -49,22 +51,22 @@ class Keyboard:
                             "DOWN"     :{"L":0x1B5B42    ,"W":0xE050    },
                             "LEFT"     :{"L":0x1B5B44    ,"W":0xE04B    },
                             "RIGHT"    :{"L":0x1B5B43    ,"W":0xE04D    },
-                            #"CTRL+UP"  :{"L":0x1B5B313B3541,"W":0xE08D    }, #TOO LONG
-                            #"CTRL+DOWN":{"L":0x1B5B313B3542,"W":0xE091    }, #TOO LONG
-                            #"CTRL+LEFT":{"L":0x1B5B313B3544,"W":0xE073    }, #TOO LONG
-                            #"CTRL+RIGHT":{"L":0x1B5B313B5343,"W":0xE074    }, #TOO LONG                            
+                            "CTRL+UP"  :{"L":0x1B5B313B3541,"W":0xE08D    }, #TOO LONG
+                            "CTRL+DOWN":{"L":0x1B5B313B3542,"W":0xE091    }, #TOO LONG
+                            "CTRL+LEFT":{"L":0x1B5B313B3544,"W":0xE073    }, #TOO LONG
+                            "CTRL+RIGHT":{"L":0x1B5B313B5343,"W":0xE074    }, #TOO LONG                            
                             #"ESC"      :{"L":0x1B        ,"W":0x1B      } #problimatic since 0x1B is the linux escape character (I think?)
                             "DEL"      :{"L":0x1B5B33    ,"W":0xE053    }, #"L":0x1B5B337E
                             "PAGEUP"   :{"L":0x1B5B35    ,"W":0xE049    }, #"L":0x1B5B357E
-                            "PAGEDOWN" :{"L":0x1B5B36    ,"W":0xE051    },  #"L":0x1B5B367E
+                            "PAGEDOWN" :{"L":0x1B5B36    ,"W":0xE051    }, #"L":0x1B5B367E
                             "INSERT"   :{"L":0x1B5B32    ,"W":0xE052    }, #"L":0x1B5B327E
                             "HOME"     :{"L":0x1B5B48    ,"W":0xE047    },
                             "END"      :{"L":0x1B5B46    ,"W":0xE04F    },
                             "BACKSPACE":{"L":0x7F        ,"W":0x08      }, #Same as CTRL+H
                             #"F1"       :{"L": None       ,"W":0x003B    }, #F1 captured by ubuntu terminal
-                            "F2"       :{"L":0x1B4F51    ,"W":0x003C    },
-                            "F3"       :{"L":0x1B4F52    ,"W":0x003D    },
-                            "F4"       :{"L":0x1B4F53    ,"W":0x003E    }
+                            #"F2"       :{"L":0x1B4F51    ,"W":0x003C    },
+                            #"F3"       :{"L":0x1B4F52    ,"W":0x003D    },
+                            #"F4"       :{"L":0x1B4F53    ,"W":0x003E    },
                             #"F5"       :{"L":0x1B5B31357E,"W":0x003F    }, #TOO LONG
                             #"F6"       :{"L":0x1B5B31377E,"W":0x0040    }, #TOO LONG
                             #"F7"       :{"L":0x1B5B31387E,"W":0x0041    }, #TOO LONG
@@ -72,7 +74,7 @@ class Keyboard:
                             #"F9"       :{"L":0x1B5B32307E,"W":0x0043    }, #TOO LONG
                             #"F10"      :{"L":0x1B5B32317E,"W":0x0044    }, #TOO LONG
                             #"F11"      :{"L": None       ,"W":0xE085    }, #F11 captured by ubuntu terminal
-                            #"F12"      :{"L":0x1B5B32347E,"W":0xE086    } #TOO LONG
+                            "F12"      :{"L":0x1B5B32347E,"W":0xE086    } #TOO LONG
                             }
 
     def _getch(self):
@@ -114,3 +116,63 @@ class Keyboard:
                         self._getch()
                     return i
         return raw
+    
+    #start new code for overhaul
+    def __BiggestByte(self, i):
+        """takes a number, and returns the most significant BYTE"""
+        while i > 255:
+            i = i >> 8
+        return i
+    
+    def __RemoveBiggestByte(self, i):
+        """takes a number, returns number without most significant BYTE"""
+        j = i
+        k = 0
+        while j > 255:
+            j = j >> 8
+            k = k + 8
+        return (j << k) ^ i
+    
+    class node:
+        def __init__(self, parent):
+            self.parent = parent #only None for root
+            self.children = None #a dictionary
+            self.value = None #The key
+            #iff value != None and chilfren != None then error
+    
+    def __insertCode(self, node, code, value):
+        #is biggestByte of code in node.children? 
+        #    true->recersive call with shifted code to child node
+        #    false->create child node, recursive call with shifted code to child node
+        #if code == 0 then value = value
+        if code == 0:
+            node.value = value
+            return
+        if node.children == None:
+            node.children = {}
+        if not(self.__BiggestByte(code) in list(node.children.keys())):
+            node.children[self.__BiggestByte(code)] = self.node(node)
+        self.__insertCode(node.children[self.__BiggestByte(code)], self.__RemoveBiggestByte(code), value)
+        return
+    
+    def _constructSearchTree_test(self):
+        """constructs a search tree, based on special keys
+        IE: look up hex code in tree, iff leaf it's that character, iff it's another dictionary keep looking, iff Null then escape
+        """
+        self.keyTree = self.node(None)
+        for i in list(self.specialKeys.keys()):
+            self.__insertCode(self.keyTree, self.specialKeys[i][self.env], i)
+            
+    def getch_test(self):
+        #just an initial test
+        """pasrses keyboard input, returns a tuple such that (parsed character if applicable, single character if applicable, raw byte stream)
+        EX: ('TAB', '\t', 0x09)
+        """
+        
+        raw = self._getch()
+        
+if __name__ == "__main__":
+    keyboard = Keyboard()
+    print(keyboard.specialKeys)
+    keyboard._constructSearchTree_test()
+    print(keyboard.keyTree)
